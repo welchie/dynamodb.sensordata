@@ -1,5 +1,6 @@
 package org.weewelchie.dynamo.sensordata.model;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
@@ -32,10 +33,8 @@ public class SensorData {
     private String tempC;
     private String tempF;
 
-
-    @Id
-    @DynamoDbPartitionKey
     @DynamoDBHashKey(attributeName = "id")
+    @DynamoDbPartitionKey
     public String getId() {
         return id;
     }
@@ -54,14 +53,17 @@ public class SensorData {
         this.date = date;
     }
 
+    @DynamoDBAttribute(attributeName = "temp_c")
     public String getTempC() {
         return tempC;
     }
+
 
     public void setTempC(String tempC) {
         this.tempC = tempC;
     }
 
+    @DynamoDBAttribute(attributeName = "temp_f")
     public String getTempF() {
         return tempF;
     }
@@ -85,8 +87,8 @@ public class SensorData {
 
     @Override
     public String toString() {
-        return "SensorData2{" +
-                "sensorId='" + sensorId + '\'' +
+        return "SensorData{" +
+                //"sensorId='" + sensorId + '\'' +
                 "id='" + id + '\'' +
                 ", date='" + date + '\'' +
                 ", tempC='" + tempC + '\'' +

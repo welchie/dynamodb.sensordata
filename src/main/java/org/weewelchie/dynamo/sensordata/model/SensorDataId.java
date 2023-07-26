@@ -7,11 +7,20 @@ import java.io.Serializable;
 
 public class SensorDataId implements Serializable {
 
-
-
     private String id;
 
     private String date;
+
+    public SensorDataId()
+    {
+        this(null,null);
+    }
+
+    public SensorDataId(String id, String date)
+    {
+        this.id = id;
+        this.date = date;
+    }
 
    @DynamoDBHashKey
     public String getId() {
