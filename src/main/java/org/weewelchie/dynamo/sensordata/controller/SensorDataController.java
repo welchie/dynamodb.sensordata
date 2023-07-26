@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.weewelchie.dynamo.sensordata.model.SensorData;
+import org.weewelchie.dynamo.sensordata.model.SensorDataId;
 import org.weewelchie.dynamo.sensordata.repositories.SensorDataRepository;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -49,10 +50,14 @@ public class SensorDataController {
         return (List<SensorData>) sensorDataRepository.findAll();
     }
 
-    @GetMapping(value = "/{id}")
-    public Optional<SensorData> findById(@PathVariable final String id)
+    @GetMapping(value = "/{id}/{date}")
+    public Optional<SensorData> findById(@PathVariable final String id,
+                                         @PathVariable final String date)
     {
-        return sensorDataRepository.findById(id);
+        SensorDataId sensorDataId = new SensorDataId();
+        sensorDataId.setId(id);
+        sensorDataId.setDate(date);
+        return sensorDataRepository.findById(sensorDataId);
     }
 
     @GetMapping(value = "/create")
