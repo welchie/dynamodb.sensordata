@@ -1,8 +1,10 @@
 package org.weewelchie.dynamo.sensordata;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
@@ -19,11 +21,6 @@ import org.weewelchie.dynamo.sensordata.model.SensorData;
 import org.weewelchie.dynamo.sensordata.repositories.SensorDataRepository;
 import org.weewelchie.dynamo.sensordata.rule.LocalDbCreationRule;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -32,6 +29,11 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = Application.class)
@@ -54,6 +56,8 @@ public class SensorDataRepositoryIntegrationTest {
     private static final String DYNAMODB_ENDPOINT = "amazon.dynamodb.endpoint";
     private static final String AWS_ACCESSKEY = "amazon.aws.accesskey";
     private static final String AWS_SECRETKEY = "amazon.aws.secretkey";
+
+    private static final String AWS_REGION = "amazon.aws.region";
     private static final String sensorID = "TEMP_987654321";
     private static final String date = "2023-07-22 12:23:45";
 
@@ -68,14 +72,21 @@ public class SensorDataRepositoryIntegrationTest {
                 .filter(properties -> !isEmpty(properties.getProperty(AWS_ACCESSKEY)))
                 .filter(properties -> !isEmpty(properties.getProperty(AWS_SECRETKEY)))
                 .filter(properties -> !isEmpty(properties.getProperty(DYNAMODB_ENDPOINT)))
+                .filter(properties -> !isEmpty(properties.getProperty(AWS_REGION)))
                 .orElseThrow(() -> new RuntimeException("Unable to get all of the required test property values"));
 
         String amazonAWSAccessKey = testProperties.getProperty(AWS_ACCESSKEY);
         String amazonAWSSecretKey = testProperties.getProperty(AWS_SECRETKEY);
         String amazonDynamoDBEndpoint = testProperties.getProperty(DYNAMODB_ENDPOINT);
+        String amazonAWSRegion = testProperties.getProperty(AWS_REGION);
 
-        amazonDynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials(amazonAWSAccessKey, amazonAWSSecretKey));
-        amazonDynamoDB.setEndpoint(amazonDynamoDBEndpoint);
+        AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(amazonDynamoDBEndpoint ,amazonAWSRegion) ;
+        amazonDynamoDB = AmazonDynamoDBClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider
+                        (new BasicAWSCredentials(amazonAWSAccessKey,amazonAWSSecretKey)))
+                .withEndpointConfiguration(endpointConfiguration)
+                .build();
+
         dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB);
     }
     @Before
@@ -94,7 +105,7 @@ public class SensorDataRepositoryIntegrationTest {
         }
 
         // TODO How to handle different environments. i.e. AVOID deleting all entries in ProductInfo on table
-        dynamoDBMapper.batchDelete((List<SensorData>) repository.findAll());
+        dynamoDBMapper.batchDelete(repository.findAll());
     }
 
     @Ignore

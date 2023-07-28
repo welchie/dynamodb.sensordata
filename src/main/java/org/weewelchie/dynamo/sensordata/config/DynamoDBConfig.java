@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 @Configuration
 @EnableDynamoDBRepositories (basePackages = "org.weewelchie.dynamo.sensordata.repositories")
 public class DynamoDBConfig {
@@ -33,15 +34,13 @@ public class DynamoDBConfig {
     @Bean
     public AmazonDynamoDB amazonDynamoDB() {
 
-        AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(amazonDynamoDBEndpoint, amazonAWSRegion) ;
-        AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder.standard()
+        System.out.println("amazon.dynamodb.endpoint:" + amazonDynamoDBEndpoint);
+        AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(amazonDynamoDBEndpoint ,amazonAWSRegion) ;
+        return AmazonDynamoDBClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider
                         (new BasicAWSCredentials(amazonAWSAccessKey,amazonAWSSecretKey)))
                 .withEndpointConfiguration(endpointConfiguration)
                 .build();
-
-
-        return amazonDynamoDB;
     }
 
     @Bean
