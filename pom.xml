@@ -155,12 +155,12 @@
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.liferay/com.fasterxml.jackson.databind -->
-        <!--<dependency>
+        <dependency>
             <groupId>com.liferay</groupId>
             <artifactId>com.fasterxml.jackson.databind</artifactId>
             <version>2.10.5.1.LIFERAY-PATCHED-1</version>
         </dependency>
-        -->
+
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -262,11 +262,15 @@
             <artifactId>netty-codec</artifactId>
             <version>4.1.86.Final</version>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${springboot.version}</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
