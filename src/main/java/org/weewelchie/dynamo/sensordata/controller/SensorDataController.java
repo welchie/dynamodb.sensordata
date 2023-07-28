@@ -77,7 +77,6 @@ public class SensorDataController {
         return sensorDataRepository.findByDateBetween(startDate,endDate);
     }
 
-
     @GetMapping(value = "/create")
     public String create(@RequestParam(value = "id") String sensorId,
                          @RequestParam(value = "date") String date,
