@@ -51,7 +51,7 @@ public class SensorDataController {
     }
 
     @GetMapping(value = "/{id}/{date}")
-    public Optional<SensorData> findById(@PathVariable final String id,
+    public Optional<SensorData> findByIdAndDate(@PathVariable final String id,
                                          @PathVariable final String date)
     {
         SensorDataId sensorDataId = new SensorDataId();
@@ -59,6 +59,24 @@ public class SensorDataController {
         sensorDataId.setDate(date);
         return sensorDataRepository.findById(sensorDataId);
     }
+
+    @GetMapping(value = "/{id}")
+    public List<SensorData> findById(@PathVariable final String id)
+    {
+        return sensorDataRepository.findById(id);
+    }
+
+    @GetMapping(value = "/find")
+    public List<SensorData> findByDate(@RequestParam(value="date") String date)    {
+        return sensorDataRepository.findByDate(date);
+    }
+
+    @GetMapping(value = "/findbetween")
+    public List<SensorData> findByDates(@RequestParam(value="startDate") String startDate,
+                                        @RequestParam(value="endDate") String endDate)    {
+        return sensorDataRepository.findByDateBetween(startDate,endDate);
+    }
+
 
     @GetMapping(value = "/create")
     public String create(@RequestParam(value = "id") String sensorId,
