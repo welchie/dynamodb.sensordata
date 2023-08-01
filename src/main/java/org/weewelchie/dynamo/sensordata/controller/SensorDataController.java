@@ -1,9 +1,18 @@
 package org.weewelchie.dynamo.sensordata.controller;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.weewelchie.dynamo.sensordata.config.DynamoDBConfig;
 import org.weewelchie.dynamo.sensordata.model.SensorData;
 import org.weewelchie.dynamo.sensordata.model.SensorDataId;
 import org.weewelchie.dynamo.sensordata.repositories.SensorDataRepository;
@@ -16,8 +25,10 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableResponse;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
+
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +55,18 @@ public class SensorDataController {
 
     @Autowired
     SensorDataRepository sensorDataRepository;
+
+    @Autowired
+    DynamoDBConfig dynamoDBConfig;
+
+    @GetMapping(value = "/hello")
+    public String hello()
+    {
+        return "Hello World Welchie";
+    }
+
+
+
     @GetMapping(value = "/all")
     public List<SensorData> findAll()
     {
@@ -92,7 +115,6 @@ public class SensorDataController {
         Properties testProperties = loadFromFileInClasspath("application.properties")
                 .filter(properties -> !isEmpty(properties.getProperty(AWS_REGION)))
                 .filter(properties -> !isEmpty(properties.getProperty(AWS_ACCESSKEY)))
-                .filter(properties -> !isEmpty(properties.getProperty(DYNAMODB_ENDPOINT)))
                 .filter(properties -> !isEmpty(properties.getProperty(AWS_SECRETKEY))).orElseThrow(() -> new RuntimeException("Unable to get all of the required test property values"));
 
         String amazonAWSRegion = testProperties.getProperty(AWS_REGION);
@@ -101,31 +123,38 @@ public class SensorDataController {
         String amazonAWSEndPointURL = testProperties.getProperty(DYNAMODB_ENDPOINT);
         AwsCredentialsProvider creds = StaticCredentialsProvider.create(AwsBasicCredentials.create(amazonAWSAccessKey, amazonAWSSecretKey));
 
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(
-                        // Configure an instance of the standard client.
-                        DynamoDbClient.builder()
-                                .region(Region.of(amazonAWSRegion))
-                                .endpointOverride(new URI(amazonAWSEndPointURL))
-                                .credentialsProvider(creds)
-                                .build())
-                .build();
+        DynamoDbClient dbClient = null;
+        if (!amazonAWSEndPointURL.equals(""))
+        {
+            dbClient = DynamoDbClient.builder()
+                    .region(Region.of(amazonAWSRegion))
+                    .endpointOverride(new URI(amazonAWSEndPointURL) )
+                    .credentialsProvider(creds)
+                    .build();
 
+        }
+        else
+        {
+            dbClient = DynamoDbClient.builder()
+                    .region(Region.of(amazonAWSRegion))
+                    .credentialsProvider(creds)
+                    .build();
+        }
 
-        DynamoDbClient dbClient = DynamoDbClient.builder()
-                .region(Region.of(amazonAWSRegion))
-                .endpointOverride(new URI(amazonAWSEndPointURL) )
-                .credentialsProvider(creds)
-                .build();
+        DynamoDbEnhancedClient enhancedClient =
+                DynamoDbEnhancedClient.builder()
+                        .dynamoDbClient(dbClient)
+                        .build();
+
         DynamoDbTable<SensorData> sensorDataTable =
                 enhancedClient.table("SensorData", TableSchema.fromBean(SensorData.class));
         return createSensorDataTable(sensorDataTable,dbClient);
 
     }
 
-    public static String createSensorDataTable(DynamoDbTable<SensorData> sensorData2DynamoDbTable, DynamoDbClient dynamoDbClient) {
+    public static String createSensorDataTable(DynamoDbTable<SensorData> sensorDataDynamoDbTable, DynamoDbClient dynamoDbClient) {
         // Create the DynamoDB table by using the 'customerDynamoDbTable' DynamoDbTable instance.
-        sensorData2DynamoDbTable.createTable(builder -> builder
+        sensorDataDynamoDbTable.createTable(builder -> builder
                 .provisionedThroughput(b -> b
                         .readCapacityUnits(10L)
                         .writeCapacityUnits(10L)
@@ -134,7 +163,7 @@ public class SensorDataController {
         // The 'dynamoDbClient' instance that's passed to the builder for the DynamoDbWaiter is the same instance
         // that was passed to the builder of the DynamoDbEnhancedClient instance used to create the 'customerDynamoDbTable'.
         // This means that the same Region that was configured on the standard 'dynamoDbClient' instance is used for all service clients.
-        try (DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build()) { // DynamoDbWaiter is Autocloseable
+        try (DynamoDbWaiter waiter = DynamoDbWaiter.builder().client((DynamoDbClient) dynamoDbClient).build()) { // DynamoDbWaiter is Autocloseable
             ResponseOrException<DescribeTableResponse> response = waiter
                     .waitUntilTableExists(builder -> builder.tableName("SensorData").build())
                     .matched();

@@ -33,13 +33,25 @@ public class DynamoDBConfig {
 
     @Bean
     public AmazonDynamoDB amazonDynamoDB() {
-        AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(amazonDynamoDBEndpoint ,amazonAWSRegion) ;
+        if (!amazonDynamoDBEndpoint.isEmpty() || !amazonDynamoDBEndpoint.equals(""))
+        {
+            AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(amazonDynamoDBEndpoint ,amazonAWSRegion) ;
+            return AmazonDynamoDBClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider
+                            (new BasicAWSCredentials(amazonAWSAccessKey,amazonAWSSecretKey)))
+                    .withEndpointConfiguration(endpointConfiguration)
+                    .build();
+        }
+        else
+        {
+            return AmazonDynamoDBClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider
+                            (new BasicAWSCredentials(amazonAWSAccessKey,amazonAWSSecretKey)))
+                    .withRegion(amazonAWSRegion)
+                    .build();
+        }
 
-        return AmazonDynamoDBClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider
-                        (new BasicAWSCredentials(amazonAWSAccessKey,amazonAWSSecretKey)))
-                .withEndpointConfiguration(endpointConfiguration)
-                .build();
+
     }
 
     @Bean
