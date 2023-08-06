@@ -10,3 +10,11 @@ Spring Boot application
 - model - DynamoDB Beans
 - repositories - Spring CRUD Repositories
 - Application.java - main Spring Boot class.
+
+### TO DO
+- Rest Integration tests
+- Delete record
+- Delete table
+- Secure admin functions
+- Version reporting
+- Postman - test scripts.

@@ -1,0 +1,150 @@
+{
+	"info": {
+		"_postman_id": "32cf2958-0def-4fb6-8af8-82f8b368d9ae",
+		"name": "SensorData - DynamoDB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "3254777",
+		"_collection_link": "https://cloudy-capsule-752318.postman.co/workspace/Strava-Workspace~b65527c5-7866-40af-8299-a5ac79a47731/collection/3254777-32cf2958-0def-4fb6-8af8-82f8b368d9ae?action=share&creator=3254777&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Get All",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Get By ID",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Get Between Dates",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/findbetween?startDate={{START_DATE}}&endDate={{END_DATE}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"findbetween"
+					],
+					"query": [
+						{
+							"key": "startDate",
+							"value": "{{START_DATE}}"
+						},
+						{
+							"key": "endDate",
+							"value": "{{END_DATE}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/find?date={{START_DATE}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"find"
+					],
+					"query": [
+						{
+							"key": "date",
+							"value": "{{START_DATE}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Hello",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Create Record",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/create?id={{TEST_ID}}&date={{TEST_DATE}}&tempC={{TEST_TEMPC}}&tempF={{TEST_TEMPF}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"create"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{TEST_ID}}"
+						},
+						{
+							"key": "date",
+							"value": "{{TEST_DATE}}"
+						},
+						{
+							"key": "tempC",
+							"value": "{{TEST_TEMPC}}"
+						},
+						{
+							"key": "tempF",
+							"value": "{{TEST_TEMPF}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Table",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/admin/create",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"admin",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
