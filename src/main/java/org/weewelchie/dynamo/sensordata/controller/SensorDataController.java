@@ -8,6 +8,7 @@ import org.weewelchie.dynamo.sensordata.config.DynamoDBConfig;
 import org.weewelchie.dynamo.sensordata.model.SensorData;
 import org.weewelchie.dynamo.sensordata.model.SensorDataId;
 import org.weewelchie.dynamo.sensordata.repositories.SensorDataRepository;
+import org.weewelchie.dynamo.sensordata.utils.SensorDataUtils;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -102,10 +103,10 @@ public class SensorDataController {
 
     @GetMapping(value="/admin/create")
     public String createSensorDataTable() throws URISyntaxException {
-        Properties testProperties = loadFromFileInClasspath("application.properties")
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_REGION)))
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_ACCESSKEY)))
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_SECRETKEY))).orElseThrow(() -> new RuntimeException("Unable to get all of the required test property values"));
+        Properties testProperties = SensorDataUtils.loadFromFileInClasspath("application.properties")
+                .filter(properties -> !SensorDataUtils.isEmpty(properties.getProperty(AWS_REGION)))
+                .filter(properties -> !SensorDataUtils.isEmpty(properties.getProperty(AWS_ACCESSKEY)))
+                .filter(properties -> !SensorDataUtils.isEmpty(properties.getProperty(AWS_SECRETKEY))).orElseThrow(() -> new RuntimeException("Unable to get all of the required test property values"));
 
         String amazonAWSRegion = testProperties.getProperty(AWS_REGION);
         String amazonAWSAccessKey = testProperties.getProperty(AWS_ACCESSKEY);
@@ -166,28 +167,28 @@ public class SensorDataController {
         }
     }
 
-    private static Optional<Properties> loadFromFileInClasspath(String fileName) {
-        InputStream stream = null;
-        try {
-            Properties config = new Properties();
-            Path configLocation = Paths.get(ClassLoader.getSystemResource(fileName).toURI());
-            stream = Files.newInputStream(configLocation);
-            config.load(stream);
-            return Optional.of(config);
-        } catch (Exception e) {
-            return Optional.empty();
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-    }
-
-    private static boolean isEmpty(String inputString) {
-        return inputString == null || "".equals(inputString);
-    }
+//    private static Optional<Properties> loadFromFileInClasspath(String fileName) {
+//        InputStream stream = null;
+//        try {
+//            Properties config = new Properties();
+//            Path configLocation = Paths.get(ClassLoader.getSystemResource(fileName).toURI());
+//            stream = Files.newInputStream(configLocation);
+//            config.load(stream);
+//            return Optional.of(config);
+//        } catch (Exception e) {
+//            return Optional.empty();
+//        } finally {
+//            if (stream != null) {
+//                try {
+//                    stream.close();
+//                } catch (IOException e) {
+//                }
+//            }
+//        }
+//    }
+//
+//    private static boolean isEmpty(String inputString) {
+//        return inputString == null || "".equals(inputString);
+//    }
 
 }
