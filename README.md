@@ -11,6 +11,10 @@ Spring Boot application
 - repositories - Spring CRUD Repositories
 - Application.java - main Spring Boot class.
 
+### Latest Updates
+- 0.0.3-SNAPSHOT
+  - Added Swagger UI integration -http://localhost:8080/swager-ui/index.html
+  - Tidied up pom.xml properties.
 ### TO DO
 - Rest Integration tests
 - Delete record
