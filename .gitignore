@@ -7,6 +7,10 @@ target/
 # Ignore properties files
 **/src/main/resources/
 **/src/test/resources/
+
+# Native libs
+**/native-libs/
+
 ### STS ###
 .apt_generated
 .classpath

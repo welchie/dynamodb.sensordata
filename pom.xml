@@ -5,7 +5,7 @@
 
     <groupId>org.weewelchie</groupId>
     <artifactId>dynamo.sensordata</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>dynamo-sensordata</name>
     <description>Spring BootApp for SensorData Dynamodb</description>
 
@@ -21,18 +21,34 @@
         <spring.version>5.1.2.RELEASE</spring.version>
         <httpclient.version>4.5.2</httpclient.version>
         <spring-data-dynamodb.version>5.1.0</spring-data-dynamodb.version>
-        <aws-java-sdk-dynamodb.version>1.12.331</aws-java-sdk-dynamodb.version>
-        <dynamodblocal.version>1.21.1</dynamodblocal.version>
         <bootstrap.version>3.3.7-1</bootstrap.version>
         <sqlite4java.version>1.0.392</sqlite4java.version>
-        <dynamodblocal.version>1.21.1</dynamodblocal.version>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
         <springboot.version>3.1.2</springboot.version>
         <log4j2.version>2.17.1</log4j2.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven-shade-plugin.version>3.5.0</maven-shade-plugin.version>
-        <maven-plugins-version>3.6.0</maven-plugins-version>
+        <maven-plugins.version>3.6.0</maven-plugins.version>
+        <org.springdoc.version>2.2.0</org.springdoc.version>
+        <aws-java-sdk.version>1.12.512</aws-java-sdk.version>
+        <spring-data-dynamodb.version>5.1.0</spring-data-dynamodb.version>
+        <junit.version>4.13.2</junit.version>
+        <junit.jupiter.version>5.9.3</junit.jupiter.version>
+        <spring-data-releasetrain.version>Neumann-SR9</spring-data-releasetrain.version>
+        <com.amazonaws.DynamoDBLocal.version>2.0.0</com.amazonaws.DynamoDBLocal.version>
+        <software.amazon.awssdk.version>2.20.110</software.amazon.awssdk.version>
+        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <org.springframework.spring.version>5.3.29</org.springframework.spring.version>
+        <org.springframework.version>6.0.11</org.springframework.version>
+        <org.h2.version>2.2.220</org.h2.version>
+        <jackson.core.version>2.15.2</jackson.core.version>
+        <jackson.databind.version>2.10.5.1.LIFERAY-PATCHED-1</jackson.databind.version>
+        <io.netty.version>4.1.96.Final</io.netty.version>
+        <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
+        <snakeyaml.version>2.1</snakeyaml.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     </properties>
 
     <dependencies>
@@ -44,15 +60,12 @@
             <type>pom</type>
         </dependency>
 
-
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <!--suppress UnresolvedMavenProperty -->
             <version>${springboot.version}</version>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
         <dependency>
@@ -68,7 +81,6 @@
             <version>${springboot.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -80,92 +92,88 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-releasetrain</artifactId>
-            <version>Neumann-SR9</version>
+            <version>${spring-data-releasetrain.version}</version>
             <type>pom</type>
         </dependency>
-
 
 		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-dynamodb</artifactId>
-			<version>1.12.512</version>
+			<version>${aws-java-sdk.version}</version>
 		</dependency>
 
 		<dependency>
             <groupId>com.github.derjust</groupId>
             <artifactId>spring-data-dynamodb</artifactId>
-            <version>5.1.0</version>
+            <version>${spring-data-dynamodb.version}</version>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/com.amazonaws/DynamoDBLocal -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>DynamoDBLocal</artifactId>
-            <version>2.0.0</version>
+            <version>${com.amazonaws.DynamoDBLocal.version}</version>
             <scope>test</scope>
         </dependency>
 
-
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+        <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet.version}</version>
             <scope>provided</scope>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.springframework/spring -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring</artifactId>
-            <version>5.3.29</version>
+            <version>${org.springframework.spring.version}</version>
             <type>pom</type>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
+
         <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.2.220</version>
+            <version>${org.h2.version}</version>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.15.2</version>
+            <version>${jackson.core.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.15.2</version>
+            <version>${jackson.core.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.liferay/com.fasterxml.jackson.databind -->
         <dependency>
             <groupId>com.liferay</groupId>
             <artifactId>com.fasterxml.jackson.databind</artifactId>
-            <version>2.10.5.1.LIFERAY-PATCHED-1</version>
+            <version>${jackson.databind.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.3</version>
+            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -173,14 +181,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>6.0.11</version>
+            <version>${org.springframework.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework/spring-tx -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>6.0.11</version>
+            <version>${org.springframework.version}</version>
         </dependency>
 
         <dependency>
@@ -189,6 +197,7 @@
             <version>${sqlite4java.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.almworks.sqlite4java</groupId>
             <artifactId>sqlite4java-win32-x86</artifactId>
@@ -196,6 +205,7 @@
             <type>dll</type>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.almworks.sqlite4java</groupId>
             <artifactId>sqlite4java-win32-x64</artifactId>
@@ -203,6 +213,7 @@
             <type>dll</type>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.almworks.sqlite4java</groupId>
             <artifactId>libsqlite4java-osx</artifactId>
@@ -210,6 +221,7 @@
             <type>dylib</type>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.almworks.sqlite4java</groupId>
             <artifactId>libsqlite4java-linux-i386</artifactId>
@@ -217,6 +229,7 @@
             <type>so</type>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.almworks.sqlite4java</groupId>
             <artifactId>libsqlite4java-linux-amd64</artifactId>
@@ -224,57 +237,67 @@
             <type>so</type>
             <scope>test</scope>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/dynamodb-enhanced -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb-enhanced</artifactId>
-            <version>2.20.110</version>
+            <version>${software.amazon.awssdk.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/profiles -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>profiles</artifactId>
-            <version>2.20.110</version>
+            <version>${software.amazon.awssdk.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-http</artifactId>
-            <version>4.1.71.Final</version>
+            <version>${io.netty.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-common</artifactId>
-            <version>4.1.77.Final</version>
+            <version>${io.netty.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>6.0.21.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>2.0</version>
-        </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec</artifactId>
-            <version>4.1.86.Final</version>
+            <version>${io.netty.version}</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate-validator.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${org.springdoc.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${springboot.version}</version>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <forceJavacCompilerUse>true</forceJavacCompilerUse>
                 </configuration>
@@ -293,26 +316,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven-plugins-version}</version>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeTypes>so,dll,dylib</includeTypes>
-                            <outputDirectory>native-libs</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven-plugins-version}</version>
+                <version>${maven-plugins.version}</version>
                 <executions>
                     <execution>
                         <id>copy</id>
@@ -333,7 +337,7 @@
                 <!-- Build an executable JAR -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>${maven-jar-plugin.version}</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -344,5 +348,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
