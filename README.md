@@ -20,5 +20,5 @@ Spring Boot application
 - Delete record
 - Delete table
 - Secure admin functions
-- Version reporting
+- ~Version reporting~
 - Postman - test scripts.
