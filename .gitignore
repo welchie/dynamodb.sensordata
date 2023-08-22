@@ -5,11 +5,14 @@ target/
 !**/src/test/**/target/
 
 # Ignore properties files
-**/src/main/resources/
-**/src/test/resources/
+**/src/main/resources/application.properties
+**/src/test/resources/application.properties
 
 # Native libs
 **/native-libs/
+
+# Logs folder
+**/logs/
 
 ### STS ###
 .apt_generated

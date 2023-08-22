@@ -5,7 +5,7 @@
 
     <groupId>org.weewelchie</groupId>
     <artifactId>dynamo.sensordata</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.4-SNAPSHOT</version>
     <name>dynamo-sensordata</name>
     <description>Spring BootApp for SensorData Dynamodb</description>
 
@@ -302,7 +302,12 @@
                     <forceJavacCompilerUse>true</forceJavacCompilerUse>
                     <source>9</source>
                     <target>9</target>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
+
+
             </plugin>
 
             <plugin>

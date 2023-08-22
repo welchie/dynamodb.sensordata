@@ -1,10 +1,16 @@
 package org.weewelchie.dynamo.sensordata.controller;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.weewelchie.dynamo.sensordata.config.AwsProperties;
 import org.weewelchie.dynamo.sensordata.config.DynamoDBConfig;
+import org.weewelchie.dynamo.sensordata.exception.AwsPropertiesException;
+import org.weewelchie.dynamo.sensordata.exception.SensorDataException;
 import org.weewelchie.dynamo.sensordata.model.SensorData;
 import org.weewelchie.dynamo.sensordata.model.SensorDataId;
 import org.weewelchie.dynamo.sensordata.repositories.SensorDataRepository;
@@ -18,28 +24,16 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableResponse;
+import software.amazon.awssdk.services.dynamodb.model.ResourceInUseException;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 
 @RestController
 @RequestMapping("/sensordata/")
 public class SensorDataController {
-
-    private static final String DYNAMODB_ENDPOINT = "amazon.dynamodb.endpoint";
-    private static final String AWS_ACCESSKEY = "amazon.aws.accesskey";
-    private static final String AWS_SECRETKEY = "amazon.aws.secretkey";
-
-    private static final String AWS_REGION = "amazon.aws.region";
 
     private  static final Logger logger = LoggerFactory.getLogger(SensorDataController.class);
 
@@ -47,86 +41,196 @@ public class SensorDataController {
     SensorDataRepository sensorDataRepository;
 
     @Autowired
+    AwsProperties awsProperties;
+
+    @Autowired
     DynamoDBConfig dynamoDBConfig;
 
-    @GetMapping(value = "/hello")
-    public String hello()
-    {
-        return "Hello World Welchie";
-    }
-
-
+    private static final String TABLE_NAME = "SensorData";
+    private static final String ERROR_TITLE = "errors";
 
     @GetMapping(value = "/all")
-    public List<SensorData> findAll()
+    public ResponseEntity<?> findAll()
     {
-        return (List<SensorData>) sensorDataRepository.findAll();
+        try {
+            logger.info("Getting all data....");
+            Map<String, List<SensorData>> response = new HashMap<>(1);
+            List<SensorData> result = (List<SensorData>) sensorDataRepository.findAll();
+            response.put(TABLE_NAME,result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        }
+        catch(Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/{id}/{date}")
-    public Optional<SensorData> findByIdAndDate(@PathVariable final String id,
+    public ResponseEntity<?> findByIdAndDate(@PathVariable final String id,
                                          @PathVariable final String date)
     {
-        SensorDataId sensorDataId = new SensorDataId();
-        sensorDataId.setId(id);
-        sensorDataId.setDate(date);
-        return sensorDataRepository.findById(sensorDataId);
+        try {
+            logger.info("Finding data by id: " + id + " and date: " + date);
+            SensorDataId sensorDataId = new SensorDataId(id,date);
+
+            Map<String, Optional<SensorData>> response = new HashMap<>(1);
+            Optional<SensorData> result = (Optional<SensorData>) sensorDataRepository.findById(sensorDataId);
+            if (!result.stream().findAny().isPresent())
+            {
+                return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+            }
+            response.put(TABLE_NAME, result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/{id}")
-    public List<SensorData> findById(@PathVariable final String id)
+    public ResponseEntity<?> findById(@PathVariable final String id)
     {
-        return sensorDataRepository.findById(id);
+        try {
+            logger.info("Find by id: " + id);
+
+            Map<String, List<SensorData>> response = new HashMap<>(1);
+            List<SensorData> result = sensorDataRepository.findById(id);
+            if (result.isEmpty())
+            {
+                return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+            }
+            response.put(TABLE_NAME, result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/find")
-    public List<SensorData> findByDate(@RequestParam(value="date") String date)    {
-        return sensorDataRepository.findByDate(date);
+    public ResponseEntity<?> findByDate(@RequestParam(value="date") String date)    {
+
+        try {
+            logger.info("Find by date: " + date);
+
+            Map<String, List<SensorData>> response = new HashMap<>(1);
+            List<SensorData> result = sensorDataRepository.findByDate(date);
+            if (result.isEmpty())
+            {
+                return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+            }
+            response.put(TABLE_NAME, result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/findbetween")
-    public List<SensorData> findByDates(@RequestParam(value="startDate") String startDate,
+    public ResponseEntity<?> findByDates(@RequestParam(value="startDate") String startDate,
                                         @RequestParam(value="endDate") String endDate)    {
-        return sensorDataRepository.findByDateBetween(startDate,endDate);
+
+        try {
+            logger.info("Find between start date: " + startDate + " and end date: " + endDate);
+
+            Map<String, List<SensorData>> response = new HashMap<>(1);
+            List<SensorData> result = sensorDataRepository.findByDateBetween(startDate,endDate);
+            if (result.isEmpty())
+            {
+                return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+            }
+            response.put(TABLE_NAME, result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/create")
-    public String create(@RequestParam(value = "id") String sensorId,
+    public ResponseEntity<?> create(@RequestParam(value = "id") String sensorId,
                          @RequestParam(value = "date") String date,
                          @RequestParam(value = "tempC") String tempC,
                          @RequestParam(value = "tempF") String tempF
                          )
     {
-          return sensorDataRepository.save(new SensorData(sensorId,date,tempC,tempF)).toString();
+
+        try {
+            SensorData sd = new SensorData(sensorId,date,tempC,tempF);
+            logger.info("Creating new record: " + sd);
+
+            Map<String, SensorData> response = new HashMap<>(1);
+            SensorData result = sensorDataRepository.save(sd);
+
+            response.put(TABLE_NAME, result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value="/admin/create")
-    public String createSensorDataTable() throws URISyntaxException {
-        Properties testProperties = loadFromFileInClasspath("application.properties")
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_REGION)))
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_ACCESSKEY)))
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_SECRETKEY))).orElseThrow(() -> new RuntimeException("Unable to get all of the required test property values"));
-
-        String amazonAWSRegion = testProperties.getProperty(AWS_REGION);
-        String amazonAWSAccessKey = testProperties.getProperty(AWS_ACCESSKEY);
-        String amazonAWSSecretKey = testProperties.getProperty(AWS_SECRETKEY);
-        String amazonAWSEndPointURL = testProperties.getProperty(DYNAMODB_ENDPOINT);
-        AwsCredentialsProvider creds = StaticCredentialsProvider.create(AwsBasicCredentials.create(amazonAWSAccessKey, amazonAWSSecretKey));
+    public ResponseEntity<?> createSensorDataTable() throws URISyntaxException, AwsPropertiesException {
+        if (    isEmpty(awsProperties.getRegion()) ||
+                isEmpty(awsProperties.getAccessKey()) ||
+                isEmpty(awsProperties.getSecretKey()))
+        {
+            throw new AwsPropertiesException("Unable to get AWS Properties");
+        }
+        logger.info("Creating SensorData table in DynamoDB...");
+        AwsCredentialsProvider creds = StaticCredentialsProvider.create(AwsBasicCredentials.create(awsProperties.getAccessKey(), awsProperties.getSecretKey()));
 
         DynamoDbClient dbClient = null;
-        if (!amazonAWSEndPointURL.equals(""))
+        if (!awsProperties.getEndPointURL().equals(""))
         {
             dbClient = DynamoDbClient.builder()
-                    .region(Region.of(amazonAWSRegion))
-                    .endpointOverride(new URI(amazonAWSEndPointURL) )
+                    .region(Region.of(awsProperties.getRegion()))
+                    .endpointOverride(new URI(awsProperties.getEndPointURL()) )
                     .credentialsProvider(creds)
                     .build();
-
         }
         else
         {
             dbClient = DynamoDbClient.builder()
-                    .region(Region.of(amazonAWSRegion))
+                    .region(Region.of(awsProperties.getRegion()))
                     .credentialsProvider(creds)
                     .build();
         }
@@ -137,56 +241,60 @@ public class SensorDataController {
                         .build();
 
         DynamoDbTable<SensorData> sensorDataTable =
-                enhancedClient.table("SensorData", TableSchema.fromBean(SensorData.class));
-        return createSensorDataTable(sensorDataTable,dbClient);
+                enhancedClient.table(TABLE_NAME, TableSchema.fromBean(SensorData.class));
+
+        try
+        {
+            String responseText =createSensorDataTable(sensorDataTable,dbClient);
+            Map<String, List<String>> response = new HashMap<String, List<String>>(1);
+            List<String> result = new ArrayList<String>();
+            result.add(responseText);
+            response.put("result",result);
+            return new ResponseEntity<Map<String, List<String>>>(response, HttpStatus.OK);
+        }
+        catch (SensorDataException e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<String, List<String>>(1);
+            List<String> errors = new ArrayList<String>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put("errors", errors);
+            return new ResponseEntity<Map<String, List<String>>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 
-    public static String createSensorDataTable(DynamoDbTable<SensorData> sensorDataDynamoDbTable, DynamoDbClient dynamoDbClient) {
+    private String createSensorDataTable(DynamoDbTable<SensorData> sensorDataDynamoDbTable, DynamoDbClient dynamoDbClient) throws SensorDataException{
         // Create the DynamoDB table by using the 'customerDynamoDbTable' DynamoDbTable instance.
-        sensorDataDynamoDbTable.createTable(builder -> builder
-                .provisionedThroughput(b -> b
-                        .readCapacityUnits(10L)
-                        .writeCapacityUnits(10L)
-                        .build())
-        );
-        // The 'dynamoDbClient' instance that's passed to the builder for the DynamoDbWaiter is the same instance
-        // that was passed to the builder of the DynamoDbEnhancedClient instance used to create the 'customerDynamoDbTable'.
-        // This means that the same Region that was configured on the standard 'dynamoDbClient' instance is used for all service clients.
-        try (DynamoDbWaiter waiter = DynamoDbWaiter.builder().client((DynamoDbClient) dynamoDbClient).build()) { // DynamoDbWaiter is Autocloseable
-            ResponseOrException<DescribeTableResponse> response = waiter
-                    .waitUntilTableExists(builder -> builder.tableName("SensorData").build())
-                    .matched();
-            DescribeTableResponse tableDescription = response.response().orElseThrow(
-                    () -> new RuntimeException("SensorData table was not created."));
-            // The actual error can be inspected in response.exception()
-
-            logger.info("SensorData table was created.");
-            return "SensorData table was created";
-        }
-    }
-
-    private static Optional<Properties> loadFromFileInClasspath(String fileName) {
-        InputStream stream = null;
-        try {
-            Properties config = new Properties();
-            Path configLocation = Paths.get(ClassLoader.getSystemResource(fileName).toURI());
-            stream = Files.newInputStream(configLocation);
-            config.load(stream);
-            return Optional.of(config);
-        } catch (Exception e) {
-            return Optional.empty();
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
+        try{
+                sensorDataDynamoDbTable.createTable(builder -> builder
+                        .provisionedThroughput(b -> b
+                                .readCapacityUnits(10L)
+                                .writeCapacityUnits(10L)
+                                .build())
+                );
+                // The 'dynamoDbClient' instance that's passed to the builder for the DynamoDbWaiter is the same instance
+                // that was passed to the builder of the DynamoDbEnhancedClient instance used to create the 'customerDynamoDbTable'.
+                // This means that the same Region that was configured on the standard 'dynamoDbClient' instance is used for all service clients.
+                try (DynamoDbWaiter waiter = DynamoDbWaiter.builder().client((DynamoDbClient) dynamoDbClient).build()) { // DynamoDbWaiter is Autocloseable
+                    ResponseOrException<DescribeTableResponse> response = waiter
+                            .waitUntilTableExists(builder -> builder.tableName("SensorData").build())
+                            .matched();
+                    DescribeTableResponse tableDescription = response.response().orElseThrow(
+                            () -> new RuntimeException("SensorData table was not created."));
+                    // The actual error can be inspected in response.exception()
                 }
-            }
-        }
-    }
 
-    private static boolean isEmpty(String inputString) {
+
+        } catch (ResourceInUseException e) {
+            throw new SensorDataException(e.getMessage());
+
+        }
+
+        logger.info("SensorData table was created.");
+        return "SensorData table was created";
+    }
+    private boolean isEmpty(String inputString) {
         return inputString == null || "".equals(inputString);
     }
 

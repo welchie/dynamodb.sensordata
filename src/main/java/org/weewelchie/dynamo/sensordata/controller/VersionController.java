@@ -30,7 +30,9 @@ public class VersionController {
             String classPath = clazz.getResource(className).toString();
             if (!classPath.startsWith("jar")) {
                 // Class not from JAR
-                throw new Exception("Cannot read version from the Manifest file");
+                String err= "Cannot read version from the Manifest file";
+                logger.error(err);
+                throw new Exception(err);
             }
             String manifestPath = classPath.substring(0, classPath.indexOf("!") + 1) +
                     "/META-INF/maven/org.weewelchie/dynamo.sensordata/pom.properties";
