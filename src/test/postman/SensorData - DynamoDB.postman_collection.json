@@ -4,14 +4,24 @@
 		"name": "SensorData - DynamoDB",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "3254777",
-		"_collection_link": "https://cloudy-capsule-752318.postman.co/workspace/Strava-Workspace~b65527c5-7866-40af-8299-a5ac79a47731/collection/3254777-32cf2958-0def-4fb6-8af8-82f8b368d9ae?action=share&creator=3254777&source=collection_link"
+		"_collection_link": "https://cloudy-capsule-752318.postman.co/workspace/Strava-Workspace~b65527c5-7866-40af-8299-a5ac79a47731/collection/3254777-32cf2958-0def-4fb6-8af8-82f8b368d9ae?action=share&source=collection_link&creator=3254777"
 	},
 	"item": [
 		{
 			"name": "Get All",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/all",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"all"
+					]
+				}
 			},
 			"response": []
 		},
@@ -19,7 +29,35 @@
 			"name": "Get By ID",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/{{TEST_ID}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"{{TEST_ID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get By ID Not Found",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/{{TEST_DUMMY_ID}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"{{TEST_DUMMY_ID}}"
+					]
+				}
 			},
 			"response": []
 		},
@@ -52,7 +90,7 @@
 			"response": []
 		},
 		{
-			"name": "Find",
+			"name": "Find By Date",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -76,10 +114,32 @@
 			"response": []
 		},
 		{
-			"name": "Hello",
+			"name": "Find By Date Not Found",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [
+					{
+						"key": "X-API-KEY",
+						"value": "{{API_KEY}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/sensordata/find?date={{TEST_DUMMY_DATE}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"find"
+					],
+					"query": [
+						{
+							"key": "date",
+							"value": "{{TEST_DUMMY_DATE}}"
+						}
+					]
+				}
 			},
 			"response": []
 		},
@@ -139,10 +199,58 @@
 			"response": []
 		},
 		{
-			"name": "New Request",
+			"name": "Get Version",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/version/get",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"version",
+						"get"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find By ID and Date",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/{{TEST_ID}}/{{TEST_DATE}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"{{TEST_ID}}",
+						"{{TEST_DATE}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find By ID and Date Not Found",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{URL}}/sensordata/{{TEST_DUMMY_ID}}/{{TEST_DATE}}",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"sensordata",
+						"{{TEST_DUMMY_ID}}",
+						"{{TEST_DATE}}"
+					]
+				}
 			},
 			"response": []
 		}
