@@ -15,9 +15,13 @@ Spring Boot application
 - 0.0.3-SNAPSHOT
   - Added Swagger UI integration -http://localhost:8080/swager-ui/index.html
   - Tidied up pom.xml properties.
+- 0.0.4-SNAPSHOT
+  - Added Service layer
+  - Added Rest Integration tests
+  - Added delete record functionality
 ### TO DO
-- Rest Integration tests
-- Delete record
+- ~Rest Integration tests~
+- ~Delete record~
 - Delete table
 - Secure admin functions
 - ~Version reporting~
