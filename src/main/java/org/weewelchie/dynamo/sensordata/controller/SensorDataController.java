@@ -13,7 +13,7 @@ import org.weewelchie.dynamo.sensordata.exception.AwsPropertiesException;
 import org.weewelchie.dynamo.sensordata.exception.SensorDataException;
 import org.weewelchie.dynamo.sensordata.model.SensorData;
 import org.weewelchie.dynamo.sensordata.model.SensorDataId;
-import org.weewelchie.dynamo.sensordata.repositories.SensorDataRepository;
+import org.weewelchie.dynamo.sensordata.service.SensorDataService;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -38,7 +38,7 @@ public class SensorDataController {
     private  static final Logger logger = LoggerFactory.getLogger(SensorDataController.class);
 
     @Autowired
-    SensorDataRepository sensorDataRepository;
+    SensorDataService sensorDataService;
 
     @Autowired
     AwsProperties awsProperties;
@@ -49,13 +49,17 @@ public class SensorDataController {
     private static final String TABLE_NAME = "SensorData";
     private static final String ERROR_TITLE = "errors";
 
+    private static final String RESULT_TITLE = "result";
+
+    private static final String NOT_FOUND = "Not Found";
+
     @GetMapping(value = "/all")
-    public ResponseEntity<?> findAll()
+    public ResponseEntity<Object> findAll()
     {
         try {
             logger.info("Getting all data....");
             Map<String, List<SensorData>> response = new HashMap<>(1);
-            List<SensorData> result = (List<SensorData>) sensorDataRepository.findAll();
+            List<SensorData> result = sensorDataService.findAll();
             response.put(TABLE_NAME,result);
             return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -72,18 +76,18 @@ public class SensorDataController {
     }
 
     @GetMapping(value = "/{id}/{date}")
-    public ResponseEntity<?> findByIdAndDate(@PathVariable final String id,
+    public ResponseEntity<Object> findByIdAndDate(@PathVariable final String id,
                                          @PathVariable final String date)
     {
         try {
-            logger.info("Finding data by id: " + id + " and date: " + date);
+            logger.info("Finding data by id: {} and date: {} ", id, date);
             SensorDataId sensorDataId = new SensorDataId(id,date);
 
             Map<String, Optional<SensorData>> response = new HashMap<>(1);
-            Optional<SensorData> result = (Optional<SensorData>) sensorDataRepository.findById(sensorDataId);
+            Optional<SensorData> result = sensorDataService.findBySensorDataID(sensorDataId);
             if (!result.stream().findAny().isPresent())
             {
-                return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(NOT_FOUND,HttpStatus.NOT_FOUND);
             }
             response.put(TABLE_NAME, result);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -100,16 +104,16 @@ public class SensorDataController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<?> findById(@PathVariable final String id)
+    public ResponseEntity<Object> findById(@PathVariable final String id)
     {
         try {
-            logger.info("Find by id: " + id);
+            logger.info("Find by id: {}" , id);
 
             Map<String, List<SensorData>> response = new HashMap<>(1);
-            List<SensorData> result = sensorDataRepository.findById(id);
+            List<SensorData> result = sensorDataService.findById(id);
             if (result.isEmpty())
             {
-                return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(NOT_FOUND,HttpStatus.NOT_FOUND);
             }
             response.put(TABLE_NAME, result);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -126,13 +130,13 @@ public class SensorDataController {
     }
 
     @GetMapping(value = "/find")
-    public ResponseEntity<?> findByDate(@RequestParam(value="date") String date)    {
+    public ResponseEntity<Object> findByDate(@RequestParam(value="date") String date)    {
 
         try {
-            logger.info("Find by date: " + date);
+            logger.info("Find by date: {}", date);
 
             Map<String, List<SensorData>> response = new HashMap<>(1);
-            List<SensorData> result = sensorDataRepository.findByDate(date);
+            List<SensorData> result = sensorDataService.findByDate(date);
             if (result.isEmpty())
             {
                 return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
@@ -152,14 +156,14 @@ public class SensorDataController {
     }
 
     @GetMapping(value = "/findbetween")
-    public ResponseEntity<?> findByDates(@RequestParam(value="startDate") String startDate,
+    public ResponseEntity<Object> findByDates(@RequestParam(value="startDate") String startDate,
                                         @RequestParam(value="endDate") String endDate)    {
 
         try {
-            logger.info("Find between start date: " + startDate + " and end date: " + endDate);
+            logger.info("Find between start date: {} and end date {} ",startDate,endDate);
 
             Map<String, List<SensorData>> response = new HashMap<>(1);
-            List<SensorData> result = sensorDataRepository.findByDateBetween(startDate,endDate);
+            List<SensorData> result = sensorDataService.findBetweenDates(startDate,endDate);
             if (result.isEmpty())
             {
                 return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
@@ -179,7 +183,7 @@ public class SensorDataController {
     }
 
     @GetMapping(value = "/create")
-    public ResponseEntity<?> create(@RequestParam(value = "id") String sensorId,
+    public ResponseEntity<Object> create(@RequestParam(value = "id") String sensorId,
                          @RequestParam(value = "date") String date,
                          @RequestParam(value = "tempC") String tempC,
                          @RequestParam(value = "tempF") String tempF
@@ -188,10 +192,10 @@ public class SensorDataController {
 
         try {
             SensorData sd = new SensorData(sensorId,date,tempC,tempF);
-            logger.info("Creating new record: " + sd);
+            logger.info("Creating new record: {}" , sd);
 
             Map<String, SensorData> response = new HashMap<>(1);
-            SensorData result = sensorDataRepository.save(sd);
+            SensorData result = sensorDataService.createRecord(sd);
 
             response.put(TABLE_NAME, result);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -207,8 +211,45 @@ public class SensorDataController {
         }
     }
 
+    @DeleteMapping(value = "/delete/{id}/{date}")
+    public ResponseEntity<Object> deleteByIDAndDate(@PathVariable final String id,
+                                                    @PathVariable final String date)    {
+
+        try {
+            logger.info("Delete by ID: {} and Date: {}", id,date);
+
+            Optional<SensorData> data = sensorDataService.findBySensorDataID(new SensorDataId(id, date));
+            if (!data.isPresent())
+            {
+                //data not found return an error
+                throw new SensorDataException("Unable to delete record: NOT FOUND");
+            }
+            else {
+                List<Optional<SensorData>> dataList = List.of(data);
+                for (Optional<SensorData> sd : dataList) {
+                    sd.ifPresent(sensorData -> sensorDataService.deleteRecord(sensorData));
+                }
+
+                Map<String, List<String>> response = new HashMap<>(1);
+                List<String> results = new ArrayList<>();
+                results.add("Record deleted");
+                response.put(RESULT_TITLE, results);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping(value="/admin/create")
-    public ResponseEntity<?> createSensorDataTable() throws URISyntaxException, AwsPropertiesException {
+    public ResponseEntity<Object> createSensorDataTable() throws URISyntaxException, AwsPropertiesException {
         if (    isEmpty(awsProperties.getRegion()) ||
                 isEmpty(awsProperties.getAccessKey()) ||
                 isEmpty(awsProperties.getSecretKey()))
@@ -218,7 +259,7 @@ public class SensorDataController {
         logger.info("Creating SensorData table in DynamoDB...");
         AwsCredentialsProvider creds = StaticCredentialsProvider.create(AwsBasicCredentials.create(awsProperties.getAccessKey(), awsProperties.getSecretKey()));
 
-        DynamoDbClient dbClient = null;
+        DynamoDbClient dbClient;
         if (!awsProperties.getEndPointURL().equals(""))
         {
             dbClient = DynamoDbClient.builder()
@@ -246,20 +287,20 @@ public class SensorDataController {
         try
         {
             String responseText =createSensorDataTable(sensorDataTable,dbClient);
-            Map<String, List<String>> response = new HashMap<String, List<String>>(1);
-            List<String> result = new ArrayList<String>();
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> result = new ArrayList<>();
             result.add(responseText);
-            response.put("result",result);
-            return new ResponseEntity<Map<String, List<String>>>(response, HttpStatus.OK);
+            response.put(RESULT_TITLE,result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         catch (SensorDataException e)
         {
             logger.error(e.getMessage());
-            Map<String, List<String>> response = new HashMap<String, List<String>>(1);
-            List<String> errors = new ArrayList<String>();
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
             errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-            response.put("errors", errors);
-            return new ResponseEntity<Map<String, List<String>>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
@@ -276,13 +317,14 @@ public class SensorDataController {
                 // The 'dynamoDbClient' instance that's passed to the builder for the DynamoDbWaiter is the same instance
                 // that was passed to the builder of the DynamoDbEnhancedClient instance used to create the 'customerDynamoDbTable'.
                 // This means that the same Region that was configured on the standard 'dynamoDbClient' instance is used for all service clients.
-                try (DynamoDbWaiter waiter = DynamoDbWaiter.builder().client((DynamoDbClient) dynamoDbClient).build()) { // DynamoDbWaiter is Autocloseable
+                try (DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build()) { // DynamoDbWaiter is Autocloseable
                     ResponseOrException<DescribeTableResponse> response = waiter
-                            .waitUntilTableExists(builder -> builder.tableName("SensorData").build())
+                            .waitUntilTableExists(builder -> builder.tableName(TABLE_NAME).build())
                             .matched();
                     DescribeTableResponse tableDescription = response.response().orElseThrow(
                             () -> new RuntimeException("SensorData table was not created."));
                     // The actual error can be inspected in response.exception()
+                    logger.info("Table {} created. {}", TABLE_NAME, tableDescription);
                 }
 
 
@@ -298,4 +340,11 @@ public class SensorDataController {
         return inputString == null || "".equals(inputString);
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(SensorDataException.class)
+    public String returnInternalServerError(SensorDataException ex) {
+        logger.error("SensorDataException", ex);
+        return ex.getMessage();
+
+    }
 }
