@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.weewelchie.dynamo.sensordata.config.AwsProperties;
 import org.weewelchie.dynamo.sensordata.model.SensorData;
 import org.weewelchie.dynamo.sensordata.repositories.SensorDataRepository;
 import org.weewelchie.dynamo.sensordata.rule.LocalDbCreationRule;
@@ -41,10 +42,6 @@ import java.util.Properties;
 @SpringBootTest(classes = Application.class)
 @WebAppConfiguration
 @ActiveProfiles("local")
-@TestPropertySource(properties = {
-        "amazon.dynamodb.endpoint=http://localhost:8000/",
-        "amazon.aws.accesskey=test1",
-        "amazon.aws.secretkey=test231" })
 public class SensorDataRepositoryIntegrationTest {
 
     @ClassRule
@@ -55,7 +52,10 @@ public class SensorDataRepositoryIntegrationTest {
     @Autowired
     SensorDataRepository repository;
 
-    private static final String DYNAMODB_ENDPOINT = "amazon.dynamodb.endpoint";
+    @Autowired
+    private static AwsProperties awsProperties;
+
+    private static final String DYNAMODB_ENDPOINT = "amazon.aws.endPointURL";
     private static final String AWS_ACCESSKEY = "amazon.aws.accesskey";
     private static final String AWS_SECRETKEY = "amazon.aws.secretkey";
 
@@ -71,17 +71,12 @@ public class SensorDataRepositoryIntegrationTest {
 
     @BeforeClass
     public static void setupClass() {
-        Properties testProperties = loadFromFileInClasspath("application.properties")
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_ACCESSKEY)))
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_SECRETKEY)))
-                .filter(properties -> !isEmpty(properties.getProperty(DYNAMODB_ENDPOINT)))
-                .filter(properties -> !isEmpty(properties.getProperty(AWS_REGION)))
-                .orElseThrow(() -> new RuntimeException("Unable to get all of the required test property values"));
+        awsProperties = new AwsProperties();
+        String amazonAWSAccessKey = awsProperties.getAccessKey();
 
-        String amazonAWSAccessKey = testProperties.getProperty(AWS_ACCESSKEY);
-        String amazonAWSSecretKey = testProperties.getProperty(AWS_SECRETKEY);
-        String amazonDynamoDBEndpoint = testProperties.getProperty(DYNAMODB_ENDPOINT);
-        String amazonAWSRegion = testProperties.getProperty(AWS_REGION);
+        String amazonAWSSecretKey = awsProperties.getSecretKey();
+        String amazonDynamoDBEndpoint = awsProperties.getEndPointURL();
+        String amazonAWSRegion = awsProperties.getRegion();
 
         AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(amazonDynamoDBEndpoint ,amazonAWSRegion) ;
         amazonDynamoDB = AmazonDynamoDBClientBuilder.standard()

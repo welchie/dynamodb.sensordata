@@ -9,7 +9,7 @@ target/
 **/src/test/resources/application.properties
 
 # Native libs
-**/native-libs/
+#**/native-libs/
 
 # Logs folder
 **/logs/
