@@ -1,4 +1,4 @@
-# DynamoDB SensorData (Sprint-boot) App
+# DynamoDB SensorData (Spring-boot) App
 
 A project to store data from a temperature sensor in DynamoDB.
 
@@ -26,3 +26,4 @@ Spring Boot application
 - Secure admin functions
 - ~Version reporting~
 - Postman - test scripts.
+- Dockerize application
