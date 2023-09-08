@@ -28,3 +28,4 @@ Spring Boot application
 - Postman - test scripts.
 - Dockerize application
 - JWT Tokens for Security
+- Swagger Open API Document methods
