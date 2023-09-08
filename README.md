@@ -27,5 +27,6 @@ Spring Boot application
 - ~Version reporting~
 - Postman - test scripts.
 - Dockerize application
+- Use DynamoDB Local form Dcoker container for integration tests.
 - JWT Tokens for Security
 - Swagger Open API Document methods
