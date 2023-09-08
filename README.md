@@ -27,3 +27,4 @@ Spring Boot application
 - ~Version reporting~
 - Postman - test scripts.
 - Dockerize application
+- JWT Tokens for Security
