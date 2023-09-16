@@ -183,7 +183,7 @@ private static final String START_DATE = "2020-01-01 00:00:00";
 
     @Test
     public void createRecord() throws SensorDataException {
-        //prepare to capture a TourRating Object
+        //prepare to capture a SensorData Object
         ArgumentCaptor<SensorData> sensorDataCaptor = ArgumentCaptor.forClass(SensorData.class);
 
         //invoke createNew

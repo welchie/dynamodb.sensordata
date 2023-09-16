@@ -7,8 +7,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.*;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,6 +18,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
+@Profile("test")
 public class SensorDataControllerTest {
 
     @Autowired
@@ -33,6 +34,8 @@ public class SensorDataControllerTest {
     private static final String TEMP_C = "12.25";
     private static final String TEMP_F = "68.15";
     private static DynamoDBProxyServer server;
+
+    private static HttpHeaders authzHeaders = new HttpHeaders();
 
     @BeforeClass
     public static void setupClass() throws Exception {
@@ -52,13 +55,25 @@ public class SensorDataControllerTest {
     @Before
     public void setUp() throws Exception {
         //Setup SensorData table in Local DynamoDB
-        restTemplate.getForEntity(SENSORDATA_URL + CREATE_TABLE,String.class);
+        authzHeaders.add("Authorization", "Basic dXNlcjpwYXNzd29yZA==");
+        authzHeaders.add("Content-Type", "application/json");
+
+        //restTemplate.getForEntity(SENSORDATA_URL + CREATE_TABLE,String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + CREATE_TABLE,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         //Create some Dummy Data
         for (int i=0;i< 60; i++) {
-            restTemplate.getForEntity(SENSORDATA_URL + "/create?id="+ID+
+            response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+ID+
                                                             "&date=" + DATE  + String.format("%02d", i) +
                                                             "&tempC=" + TEMP_C +
-                                                            "&tempF=" + TEMP_F, String.class);
+                                                            "&tempF=" + TEMP_F,
+                    HttpMethod.GET,
+                    new HttpEntity<>(null,authzHeaders),
+                    String.class
+            );
         }
     }
 
@@ -72,8 +87,14 @@ public class SensorDataControllerTest {
     }
 
     @Test
-    public void findAll() {
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/all", String.class);
+    public void findAll()
+    {
+
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/all",
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
 
         assertThat(response.getStatusCode(),is(HttpStatus.OK));
         String body = response.getBody();
@@ -83,11 +104,17 @@ public class SensorDataControllerTest {
         assertThat(body, containsString(TEMP_F));
     }
 
+
+
     @Test
     public void findByIdAndDate()
     {
         String testDate = DATE + "01";
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/" + ID + "/" +testDate, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/" + ID + "/" +testDate,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
 
         assertThat(response.getStatusCode(),is(HttpStatus.OK));
         String body = response.getBody();
@@ -99,15 +126,23 @@ public class SensorDataControllerTest {
     @Test
     public void findByIdAndDateNotFound()
     {
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/" + ID + "/" + DATE, String.class);
+
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/" + ID + "/" + DATE,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.NOT_FOUND));
     }
 
         @Test
     public void findByID()
     {
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/" + ID , String.class);
-
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/" + ID ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.OK));
         String body = response.getBody();
         assertThat(body, containsString(ID));
@@ -116,8 +151,11 @@ public class SensorDataControllerTest {
     @Test
     public void findByIDNotFound()
     {
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/DUMMY_ID", String.class);
-
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/DUMMY_ID" ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.NOT_FOUND));
     }
 
@@ -126,7 +164,11 @@ public class SensorDataControllerTest {
     {
         String startDate = DATE + "00";
         String endDate = DATE + "01";
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/findbetween?startDate=" + startDate + "&endDate=" + endDate, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/findbetween?startDate=" + startDate + "&endDate=" + endDate ,
+            HttpMethod.GET,
+            new HttpEntity<>(null, authzHeaders),
+            String.class
+        );
 
         assertThat(response.getStatusCode(),is(HttpStatus.OK));
         String body = response.getBody();
@@ -139,8 +181,11 @@ public class SensorDataControllerTest {
     public void findBetweenDatesNotFound()
     {
         String date = "1900-01-01 00:00:00";
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/findbetween?startDate=" + date + "&endDate=" + date, String.class);
-
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/findbetween?startDate=" + date + "&endDate=" + date ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.NOT_FOUND));
 
     }
@@ -149,7 +194,11 @@ public class SensorDataControllerTest {
     public void findByDate()
     {
         String date = DATE + "01";
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/find?date=" + date, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/find?date=" + date ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.OK));
         String body = response.getBody();
         assertThat(body, containsString(ID));
@@ -160,7 +209,11 @@ public class SensorDataControllerTest {
     public void findByDateNotFound()
     {
         String date = "1900-01-01 00:00:00";
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/find?date=" + date, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/find?date=" + date ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.NOT_FOUND));
     }
 
@@ -172,10 +225,14 @@ public class SensorDataControllerTest {
         String tempC = "27.4";
         String tempF = "70.12";
 
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/create?id="+testID+
-                "&date=" + testDate +
-                "&tempC=" + tempC +
-                "&tempF=" + tempF, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+testID+
+                        "&date=" + testDate +
+                        "&tempC=" + tempC +
+                        "&tempF=" + tempF ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.OK));
         String body = response.getBody();
         assertThat(body, containsString(testID));
@@ -187,10 +244,14 @@ public class SensorDataControllerTest {
     @Test
     public void createRecordError()
     {
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/create?id="+ " " +
-                "&date=" + " " +
-                "&tempC=" + TEMP_C +
-                "&tempF=" + TEMP_F, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+ " " +
+                        "&date=" + " " +
+                        "&tempC=" + TEMP_C +
+                        "&tempF=" + TEMP_F ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.INTERNAL_SERVER_ERROR));
 
     }
@@ -199,17 +260,29 @@ public class SensorDataControllerTest {
     public void deleteRecord()
     {
         String date = DATE + "01";
-        restTemplate.delete(SENSORDATA_URL + "/delete/"+ ID + "/" + date, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/delete/"+ ID + "/" + date ,
+                HttpMethod.DELETE,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
 
         //Try to find the record that was deleted this should return not found
-        ResponseEntity<String> response = restTemplate.getForEntity(SENSORDATA_URL + "/" + ID + "/" +date, String.class);
+       response = restTemplate.exchange(SENSORDATA_URL + "/" + ID + "/" +date ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         assertThat(response.getStatusCode(),is(HttpStatus.NOT_FOUND));
     }
 
     @Test
     public void deleteRecordError()
     {
-        restTemplate.delete(SENSORDATA_URL + "/delete/"+ "DUMMY_ID" + "/1900-01-01 00:00:00" , String.class);
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/delete/"+ "DUMMY_ID" + "/1900-01-01 00:00:00" ,
+                HttpMethod.DELETE,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
         //assertThat(response.getStatusCode(),is(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 }
