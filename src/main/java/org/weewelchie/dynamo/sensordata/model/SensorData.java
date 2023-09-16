@@ -15,8 +15,6 @@ import java.util.Objects;
 @DynamoDBTable(tableName = "SensorData")
 public class SensorData {
 
-
-
     @Id
     private SensorDataId sensorId;
     public SensorData(String id, String date, String tempC, String tempF) {
