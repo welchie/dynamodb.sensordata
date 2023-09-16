@@ -5,7 +5,7 @@
 
     <groupId>org.weewelchie</groupId>
     <artifactId>dynamo.sensordata</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.5-SNAPSHOT</version>
     <name>dynamo-sensordata</name>
     <description>Spring BootApp for SensorData Dynamodb</description>
 
