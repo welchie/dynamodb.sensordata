@@ -19,6 +19,8 @@ Spring Boot application
   - Added Service layer
   - Added Rest Integration tests
   - Added delete record functionality
+- 0.0.5-SNAPSHOT
+  - Added Docker  
 ### TO DO
 - ~Rest Integration tests~
 - ~Delete record~
@@ -27,6 +29,6 @@ Spring Boot application
 - ~Version reporting~
 - Postman - test scripts.
 - Dockerize application
-- Use DynamoDB Local form Dcoker container for integration tests.
+- ~Use DynamoDB Local form Docker container for integration tests.~
 - JWT Tokens for Security
 - Swagger Open API Document methods
