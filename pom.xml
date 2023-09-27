@@ -24,10 +24,13 @@
         <bootstrap.version>3.3.7-1</bootstrap.version>
         <sqlite4java.version>1.0.392</sqlite4java.version>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-        <springboot.version>3.1.2</springboot.version>
+        <springboot.version>3.1.4</springboot.version>
         <log4j2.version>2.17.1</log4j2.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <!--<maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>-->
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <java.version>21</java.version>
         <maven-shade-plugin.version>3.5.0</maven-shade-plugin.version>
         <maven-plugins.version>3.6.0</maven-plugins.version>
         <org.springdoc.version>2.2.0</org.springdoc.version>
@@ -75,12 +78,6 @@
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${springboot.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -344,8 +341,8 @@
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <forceJavacCompilerUse>true</forceJavacCompilerUse>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>21</source>
+                    <target>21</target>
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
@@ -361,6 +358,20 @@
                 <configuration>
                     <includeSystemScope>true</includeSystemScope>
                     <mainClass>org.weewelchie.dynamo.sensordata.Application</mainClass>
+                    <image>
+                        <env>
+                            <BP_JVM_VERSION>21</BP_JVM_VERSION>
+                        </env>
+                        <buildpacks>
+
+                            <buildpack>gcr.io/paketo-buildpacks/amazon-corretto</buildpack>
+                            <buildpack>paketo-buildpacks/java</buildpack>
+                            <buildpack>gcr.io/paketo-buildpacks/spring-boot</buildpack>
+                            <buildpack>gcr.io/paketo-buildpacks/syft</buildpack>
+
+
+                        </buildpacks>
+                    </image>
                 </configuration>
             </plugin>
 
