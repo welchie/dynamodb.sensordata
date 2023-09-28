@@ -28,6 +28,7 @@ public class SensorDataService {
     public List<SensorData> findAll()
     {
         logger.info("Finding All SensorData records");
+        logger.debug("Repo data:{}",sensorDataRepo);
         return (List<SensorData>) sensorDataRepo.findAll();
     }
 

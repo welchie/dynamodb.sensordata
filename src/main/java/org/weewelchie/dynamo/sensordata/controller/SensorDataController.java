@@ -184,6 +184,7 @@ public class SensorDataController {
 
     @GetMapping(value = "/create")
     public ResponseEntity<Object> create(@RequestParam(value = "id") String sensorId,
+                         @RequestParam(value = "name") String name,
                          @RequestParam(value = "date") String date,
                          @RequestParam(value = "tempC") String tempC,
                          @RequestParam(value = "tempF") String tempF
@@ -191,7 +192,7 @@ public class SensorDataController {
     {
 
         try {
-            SensorData sd = new SensorData(sensorId,date,tempC,tempF);
+            SensorData sd = new SensorData(sensorId,name, date,tempC,tempF);
             logger.info("Creating new record: {}" , sd);
 
             Map<String, SensorData> response = new HashMap<>(1);

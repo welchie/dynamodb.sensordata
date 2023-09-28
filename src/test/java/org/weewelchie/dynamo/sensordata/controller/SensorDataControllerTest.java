@@ -30,6 +30,7 @@ public class SensorDataControllerTest {
     private static final String CREATE_TABLE = "/admin/create";
 
     private static final String ID = "TEST-1234";
+    private static final String NAME = "TEST_NAME";
     private static final String DATE = "2020-01-01 00:00:";
     private static final String TEMP_C = "12.25";
     private static final String TEMP_F = "68.15";
@@ -67,6 +68,7 @@ public class SensorDataControllerTest {
         //Create some Dummy Data
         for (int i=0;i< 60; i++) {
             response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+ID+
+                                                            "&name=" + NAME +
                                                             "&date=" + DATE  + String.format("%02d", i) +
                                                             "&tempC=" + TEMP_C +
                                                             "&tempF=" + TEMP_F,
@@ -99,6 +101,7 @@ public class SensorDataControllerTest {
         assertThat(response.getStatusCode(),is(HttpStatus.OK));
         String body = response.getBody();
         assertThat(body, containsString(ID));
+        assertThat(body, containsString(NAME));
         assertThat(body, containsString(DATE));
         assertThat(body, containsString(TEMP_C));
         assertThat(body, containsString(TEMP_F));
@@ -226,6 +229,7 @@ public class SensorDataControllerTest {
         String tempF = "70.12";
 
         ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+testID+
+                        "&name=" + NAME +
                         "&date=" + testDate +
                         "&tempC=" + tempC +
                         "&tempF=" + tempF ,
@@ -245,6 +249,7 @@ public class SensorDataControllerTest {
     public void createRecordError()
     {
         ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+ " " +
+                        "&name=" + " " +
                         "&date=" + " " +
                         "&tempC=" + TEMP_C +
                         "&tempF=" + TEMP_F ,

@@ -64,6 +64,8 @@ public class SensorDataRepositoryIntegrationTest {
     private static final String sensorID = "TEMP_987654321";
     private static final String date = "2023-07-22 12:23:45";
 
+    private static final String NAME = "TEST_NAME";
+
     private static final String tempC = "12.12";
 
     private static final String tempF = "68.453";
@@ -111,7 +113,7 @@ public class SensorDataRepositoryIntegrationTest {
     @Ignore
     @Test
     public void givenItemWithExpectedCost_whenRunFindAll_thenItemIsFound() {
-        SensorData sensorData = new SensorData(sensorID,date,tempC,tempF);
+        SensorData sensorData = new SensorData(sensorID,NAME,date,tempC,tempF);
         repository.save(sensorData);
         List<SensorData> result = (List<SensorData>) repository.findAll();
 

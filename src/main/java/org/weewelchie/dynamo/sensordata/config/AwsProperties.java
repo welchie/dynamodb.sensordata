@@ -13,7 +13,7 @@ public class AwsProperties {
     private String secretKey;
     private String region;
 
-    private String endPointURL;
+    private String endPointURL= "";
 
     public String getAccessKey() {
         return accessKey;
