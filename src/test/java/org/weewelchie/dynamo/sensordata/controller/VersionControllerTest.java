@@ -1,5 +1,6 @@
 package org.weewelchie.dynamo.sensordata.controller;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,6 @@ public class VersionControllerTest {
     public void testGetVersion() {
         ResponseEntity<String> response = restTemplate.getForEntity(VERSION_URL, String.class);
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_GATEWAY));
-        assertThat(response.getBody(), is("{\"errors\":[\"Cannot read version from the Manifest file\"]}"));
+        assertThat(response.getBody(), CoreMatchers.containsString("{\"profiles\":[\"\"],\"errors\":[\"Cannot read version from the Manifest file\"]}"));
     }
 }

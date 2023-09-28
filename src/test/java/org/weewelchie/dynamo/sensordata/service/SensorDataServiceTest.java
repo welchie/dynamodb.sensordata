@@ -27,24 +27,24 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SensorDataServiceTest {
 
-@Mock
-private SensorDataRepository sensorDataRepositoryMock;
+    @Mock
+    private SensorDataRepository sensorDataRepositoryMock;
 
-@InjectMocks
-private SensorDataService service;
+    @InjectMocks
+    private SensorDataService service;
 
-@Mock
-private SensorData sensorDataMock;
+    @Mock
+    private SensorData sensorDataMock;
 
-@Mock
-private SensorDataId sensorDataIdMock;
+    @Mock
+    private SensorDataId sensorDataIdMock;
 
-private static final String ID = "TEMP-1234567890";
-private static final String START_DATE = "2020-01-01 00:00:00";
+    private static final String ID = "TEMP-1234567890";
+
+    private static final String NAME = "TEST_NAME";
+    private static final String START_DATE = "2020-01-01 00:00:00";
 
     private static final String END_DATE = "2020-01-31 23:59:59";
-
-    private static final SensorDataId SENSOR_DATA_ID = new SensorDataId(ID,START_DATE);
 
     @Before
     public void setupReturnValuesOfMockMethods() {
@@ -63,7 +63,7 @@ private static final String START_DATE = "2020-01-01 00:00:00";
     }
 
     @Test
-    public void findByIDNoData() throws SensorDataException {
+    public void findByIDNoData() {
 
         Exception exception = assertThrows(SensorDataException.class, ()-> {
             //invoke createNew wih no data
@@ -78,14 +78,12 @@ private static final String START_DATE = "2020-01-01 00:00:00";
 
     @Test
     public void findBySensorDataId() throws SensorDataException {
-        //invoke and verify lookupRatingById
-        SensorDataId sensorDataId = new SensorDataId(ID,START_DATE);
 
         assertThat(service.findBySensorDataID(sensorDataIdMock), is(Optional.of(sensorDataMock)));
     }
 
     @Test
-    public void findBySensorDataIdNoData() throws SensorDataException {
+    public void findBySensorDataIdNoData() {
 
         Exception exception = assertThrows(SensorDataException.class, ()-> {
             //invoke createNew wih no data
@@ -99,7 +97,7 @@ private static final String START_DATE = "2020-01-01 00:00:00";
     }
 
     @Test
-    public void findBySensorDataIdNull() throws SensorDataException {
+    public void findBySensorDataIdNull() {
 
         Exception exception = assertThrows(SensorDataException.class, ()-> {
             //invoke createNew wih no data
@@ -140,7 +138,7 @@ private static final String START_DATE = "2020-01-01 00:00:00";
     }
 
     @Test
-    public void findBetweenDatesNoValues() throws SensorDataException {
+    public void findBetweenDatesNoValues() {
 
         Exception exception = assertThrows(SensorDataException.class, ()-> {
             //invoke createNew wih no data
@@ -154,7 +152,7 @@ private static final String START_DATE = "2020-01-01 00:00:00";
     }
 
     @Test
-    public void findBetweenDatesNoStartDate() throws SensorDataException {
+    public void findBetweenDatesNoStartDate() {
 
         Exception exception = assertThrows(SensorDataException.class, ()-> {
             //invoke createNew wih no data
@@ -168,7 +166,7 @@ private static final String START_DATE = "2020-01-01 00:00:00";
     }
 
     @Test
-    public void findBetweenDatesNoEndDate() throws SensorDataException {
+    public void findBetweenDatesNoEndDate() {
 
         Exception exception = assertThrows(SensorDataException.class, ()-> {
             //invoke createNew wih no data
@@ -187,7 +185,7 @@ private static final String START_DATE = "2020-01-01 00:00:00";
         ArgumentCaptor<SensorData> sensorDataCaptor = ArgumentCaptor.forClass(SensorData.class);
 
         //invoke createNew
-        SensorData sensorData = new SensorData(ID,START_DATE,"12.25","68.13");
+        SensorData sensorData = new SensorData(ID,NAME,START_DATE,"12.25","68.13");
         //assertThat(service.createRecord(sensorData),is(sensorDataTest));
 
         service.createRecord(sensorData);
@@ -202,7 +200,7 @@ private static final String START_DATE = "2020-01-01 00:00:00";
     }
 
     @Test
-    public void createRecordInvalidData() throws SensorDataException
+    public void createRecordInvalidData()
     {
         Exception exception = assertThrows(SensorDataException.class, ()-> {
             //invoke createNew wih no data

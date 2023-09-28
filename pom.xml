@@ -5,7 +5,7 @@
 
     <groupId>org.weewelchie</groupId>
     <artifactId>dynamo.sensordata</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.6-SNAPSHOT</version>
     <name>dynamo-sensordata</name>
     <description>Spring BootApp for SensorData Dynamodb</description>
 
@@ -26,8 +26,6 @@
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
         <springboot.version>3.1.4</springboot.version>
         <log4j2.version>2.17.1</log4j2.version>
-        <!--<maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>-->
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.source>21</maven.compiler.source>
         <java.version>21</java.version>
@@ -52,7 +50,24 @@
         <snakeyaml.version>2.1</snakeyaml.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <docker.user>welchie99</docker.user>
+        <docker.password>used2Think$$</docker.password>
+        <docker.url>https://hub.docker.com</docker.url>
+        <spring.profile>PROD</spring.profile>
+        <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
+        <dockerfile>Dockerfile</dockerfile>
+        <dockerfile.contextDirectory>${project.basedir}</dockerfile.contextDirectory>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>${docker.user}</id>
+            <name>${project.artifactId}</name>
+            <uniqueVersion>false</uniqueVersion>
+            <layout>legacy</layout>
+            <url>https://hub.docker.com/welchie99/${project.artifactId}</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
@@ -363,13 +378,10 @@
                             <BP_JVM_VERSION>21</BP_JVM_VERSION>
                         </env>
                         <buildpacks>
-
                             <buildpack>gcr.io/paketo-buildpacks/amazon-corretto</buildpack>
                             <buildpack>paketo-buildpacks/java</buildpack>
                             <buildpack>gcr.io/paketo-buildpacks/spring-boot</buildpack>
                             <buildpack>gcr.io/paketo-buildpacks/syft</buildpack>
-
-
                         </buildpacks>
                     </image>
                 </configuration>
@@ -408,6 +420,93 @@
                     </archive>
                 </configuration>
             </plugin>
+           <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+
+                    <!-- Remove existing image from local repo -->
+
+                    <execution>
+                        <id>docker-clean</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <arguments>
+                                <argument>rmi</argument>
+                                <argument>${docker.user}/${project.artifactId}:${project.version}-${spring.profile}</argument>
+                                <argument>--force</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!--
+                      Create new docker image using Dockerfile which must be present in current working directory.
+                      Tag the image using maven project version information.
+                    -->
+                    <execution>
+                        <id>docker-build</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-f</argument>
+                                <argument>Dockerfile</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.user}/${project.artifactId}:${project.version}-${spring.profile}</argument>
+                                <argument>.</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- Login and Push the image to a docker repo. -->
+                    <execution>
+                        <id>docker-login</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <arguments>
+                                <argument>login</argument>
+                                <argument>-u</argument>
+                                <argument>${docker.user}</argument>
+                                <argument>-p</argument>
+                                <argument>${docker.password}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>docker-push</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <arguments>
+                                <argument>push</argument>
+                                <argument>${docker.user}/${project.artifactId}:${project.version}-${spring.profile}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 </project>

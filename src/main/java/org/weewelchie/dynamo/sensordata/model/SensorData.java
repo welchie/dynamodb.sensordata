@@ -17,8 +17,9 @@ public class SensorData {
 
     @Id
     private SensorDataId sensorId;
-    public SensorData(String id, String date, String tempC, String tempF) {
+    public SensorData(String id, String name, String date, String tempC, String tempF) {
         this.id = id;
+        this.name = name;
         this.date = date;
         this.tempC = tempC;
         this.tempF = tempF;
@@ -27,6 +28,10 @@ public class SensorData {
     public SensorData() {}
 
     private String id;
+
+
+
+    private String name;
     private String date;
     private String tempC;
     private String tempF;
@@ -47,6 +52,14 @@ public class SensorData {
         return date;
     }
 
+    @DynamoDBAttribute(attributeName = "name")
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     public void setDate(String date) {
         this.date = date;
     }
@@ -75,19 +88,19 @@ public class SensorData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SensorData that = (SensorData) o;
-        return Objects.equals(id, that.id) && Objects.equals(date, that.date) && Objects.equals(tempC, that.tempC) && Objects.equals(tempF, that.tempF);
+        return Objects.equals(sensorId, that.sensorId) && Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(date, that.date) && Objects.equals(tempC, that.tempC) && Objects.equals(tempF, that.tempF);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, tempC, tempF);
+        return Objects.hash(sensorId, id, name, date, tempC, tempF);
     }
 
     @Override
     public String toString() {
         return "SensorData{" +
-                //"sensorId='" + sensorId + '\'' +
                 "id='" + id + '\'' +
+                ", name='" + name + '\'' +
                 ", date='" + date + '\'' +
                 ", tempC='" + tempC + '\'' +
                 ", tempF='" + tempF + '\'' +

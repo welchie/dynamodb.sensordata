@@ -2,6 +2,7 @@ package org.weewelchie.dynamo.sensordata.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +49,9 @@ public class VersionController {
             }
 
             Map<String, String> info = new HashMap<String, String>(1);
+            info.put("profiles",getActiveProfiles());
+
+
             String data2 = data.toString();
             String[] lines = data2.split("\n");
             for(String str:lines)
@@ -62,11 +66,30 @@ public class VersionController {
             return new ResponseEntity<Map<String, String>>(info, HttpStatus.OK);
         } catch (Exception e) {
             Map<String, List<String>> response = new HashMap<String, List<String>>(1);
+
+            List<String> profiles = new ArrayList<>();
+            profiles.add(getActiveProfiles());
+            response.put("profiles",profiles);
+
             List<String> errors = new ArrayList<String>();
             errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
             response.put("errors", errors);
+
             return new ResponseEntity<Map<String, List<String>>>(response, HttpStatus.BAD_GATEWAY);
         }
 
+    }
+
+    @Value("${spring.profiles.active:}")
+    private String activeProfiles;
+
+    public String getActiveProfiles() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String profileName : activeProfiles.split(",")) {
+            logger.info("Currently active profile - {}" ,profileName);
+            stringBuilder.append(profileName);
+        }
+
+        return stringBuilder.toString();
     }
 }
