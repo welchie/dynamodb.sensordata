@@ -1,6 +1,9 @@
 package org.weewelchie.dynamo.sensordata.controller;
 
 
+import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
+import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
+import com.amazonaws.services.dynamodbv2.model.KeyType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableResponse;
+import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 import software.amazon.awssdk.services.dynamodb.model.ResourceInUseException;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
 
@@ -129,14 +133,71 @@ public class SensorDataController {
         }
     }
 
-    @GetMapping(value = "/find")
-    public ResponseEntity<Object> findByDate(@RequestParam(value="date") String date)    {
+    @GetMapping(value = "/find/{name}")
+    public ResponseEntity<Object> findByName(@PathVariable String name)    {
 
         try {
-            logger.info("Find by date: {}", date);
+            logger.info("Find by name: {}", name);
 
             Map<String, List<SensorData>> response = new HashMap<>(1);
-            List<SensorData> result = sensorDataService.findByDate(date);
+            List<SensorData> result = sensorDataService.findByName(name);
+            if (result.isEmpty())
+            {
+                return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+            }
+            response.put(TABLE_NAME, result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping(value = "/findbynameanddatebetween")
+    public ResponseEntity<Object> findByNameBetween(
+            @RequestParam(value="name") String name,
+            @RequestParam(value="startdate") String startdate,
+            @RequestParam(value="enddate") String enddate)    {
+
+        try {
+            logger.info("Find by name between: {} : {}:{}", name,startdate,enddate);
+
+            Map<String, List<SensorData>> response = new HashMap<>(1);
+            List<SensorData> result = sensorDataService.findByNameAndDateBetween(name,startdate,enddate);
+            if (result.isEmpty())
+            {
+                return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
+            }
+            response.put(TABLE_NAME, result);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage());
+            Map<String, List<String>> response = new HashMap<>(1);
+            List<String> errors = new ArrayList<>();
+            errors.add(e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            response.put(ERROR_TITLE, errors);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping(value = "/findbynameanddate")
+    public ResponseEntity<Object> findByNameBetween(
+            @RequestParam(value="name") String name,
+            @RequestParam(value="date") String date)    {
+
+        try {
+            logger.info("Find by name: {} and date: {}", name,date);
+
+            Map<String, List<SensorData>> response = new HashMap<>(1);
+            List<SensorData> result = sensorDataService.findByNameAndDate(name,date);
             if (result.isEmpty())
             {
                 return new ResponseEntity<>("Not found",HttpStatus.NOT_FOUND);
@@ -285,6 +346,7 @@ public class SensorDataController {
         DynamoDbTable<SensorData> sensorDataTable =
                 enhancedClient.table(TABLE_NAME, TableSchema.fromBean(SensorData.class));
 
+
         try
         {
             String responseText =createSensorDataTable(sensorDataTable,dbClient);
@@ -309,12 +371,22 @@ public class SensorDataController {
     private String createSensorDataTable(DynamoDbTable<SensorData> sensorDataDynamoDbTable, DynamoDbClient dynamoDbClient) throws SensorDataException{
         // Create the DynamoDB table by using the 'customerDynamoDbTable' DynamoDbTable instance.
         try{
-                sensorDataDynamoDbTable.createTable(builder -> builder
+            sensorDataDynamoDbTable.createTable(builder -> builder
+                        .globalSecondaryIndices(gsi -> gsi.indexName("name-date-index")
+                                // 3. Populate the GSI with all attributes.
+                                .projection(p -> p
+                                        .projectionType(ProjectionType.ALL))
+                                .provisionedThroughput(b -> b
+                                        .readCapacityUnits(10L)
+                                        .writeCapacityUnits(10L)
+                                        .build())
+                        )
                         .provisionedThroughput(b -> b
                                 .readCapacityUnits(10L)
                                 .writeCapacityUnits(10L)
                                 .build())
                 );
+
                 // The 'dynamoDbClient' instance that's passed to the builder for the DynamoDbWaiter is the same instance
                 // that was passed to the builder of the DynamoDbEnhancedClient instance used to create the 'customerDynamoDbTable'.
                 // This means that the same Region that was configured on the standard 'dynamoDbClient' instance is used for all service clients.

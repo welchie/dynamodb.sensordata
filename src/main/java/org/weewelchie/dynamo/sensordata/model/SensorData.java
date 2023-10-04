@@ -1,13 +1,8 @@
 package org.weewelchie.dynamo.sensordata.model;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import org.springframework.data.annotation.Id;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.util.Objects;
 
@@ -48,11 +43,15 @@ public class SensorData {
 
     @DynamoDbSortKey
     @DynamoDBRangeKey(attributeName = "date")
+    @DynamoDBIndexRangeKey(globalSecondaryIndexName = "name-date-index",attributeName = "date")
+    @DynamoDbSecondarySortKey(indexNames = "name-date-index")
     public String getDate() {
         return date;
     }
 
     @DynamoDBAttribute(attributeName = "name")
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "name-date-index", attributeName = "name")
+    @DynamoDbSecondaryPartitionKey(indexNames = "name-date-index")
     public String getName() {
         return name;
     }

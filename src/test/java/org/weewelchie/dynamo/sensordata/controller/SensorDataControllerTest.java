@@ -194,33 +194,6 @@ public class SensorDataControllerTest {
     }
 
     @Test
-    public void findByDate()
-    {
-        String date = DATE + "01";
-        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/find?date=" + date ,
-                HttpMethod.GET,
-                new HttpEntity<>(null, authzHeaders),
-                String.class
-        );
-        assertThat(response.getStatusCode(),is(HttpStatus.OK));
-        String body = response.getBody();
-        assertThat(body, containsString(ID));
-        assertThat(body, containsString(date));
-    }
-
-    @Test
-    public void findByDateNotFound()
-    {
-        String date = "1900-01-01 00:00:00";
-        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/find?date=" + date ,
-                HttpMethod.GET,
-                new HttpEntity<>(null, authzHeaders),
-                String.class
-        );
-        assertThat(response.getStatusCode(),is(HttpStatus.NOT_FOUND));
-    }
-
-    @Test
     public void createRecord()
     {
         String testDate = "2020-12-31 23:59:59";

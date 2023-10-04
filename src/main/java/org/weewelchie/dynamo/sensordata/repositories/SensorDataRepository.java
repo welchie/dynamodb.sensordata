@@ -17,4 +17,9 @@ public interface SensorDataRepository extends CrudRepository<SensorData, SensorD
 
     List<SensorData> findById(String id);
 
+    List<SensorData> findByName(String name);
+
+    List<SensorData> findByNameAndDateBetween(String name,String startDate, String endDate);
+
+    List<SensorData> findByNameAndDate(String name, String date);
 }
