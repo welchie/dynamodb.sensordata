@@ -126,6 +126,34 @@ public class SensorDataService {
         sensorDataRepo.delete(sensorData);
     }
 
+    public List<SensorData> findByName(String name) throws SensorDataException {
+        if (name.isEmpty())
+            throw new SensorDataException("Name parameter is empty");
+        else
+        {
+            logger.info("Finding SensorData records by Name: {} " , name);
+            return sensorDataRepo.findByName(name);
+        }
+    }
 
+    public List<SensorData> findByNameAndDateBetween(String name, String startDate, String endDate) throws SensorDataException {
+        if (name.isEmpty())
+            throw new SensorDataException("Name parameter is empty");
+        else
+        {
+            logger.info("Finding SensorData records by Name: {} " , name);
+            return sensorDataRepo.findByNameAndDateBetween(name,startDate,endDate);
+        }
+    }
+
+    public List<SensorData> findByNameAndDate(String name, String date) throws SensorDataException {
+        if (name.isEmpty())
+            throw new SensorDataException("Name parameter is empty");
+        else
+        {
+            logger.info("Finding SensorData records by Name: {} and Date: {} " , name,date);
+            return sensorDataRepo.findByNameAndDate(name,date);
+        }
+    }
 
 }
