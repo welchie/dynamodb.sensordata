@@ -50,8 +50,8 @@
         <snakeyaml.version>2.1</snakeyaml.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-        <docker.user>welchie99</docker.user>
-        <docker.password>used2Think$$</docker.password>
+        <docker.user>${env.DOCKER_USER}</docker.user>
+        <docker.password>${env.DOCKER_PASSWORD}</docker.password>
         <docker.url>https://hub.docker.com</docker.url>
         <spring.profile>PROD</spring.profile>
         <dockerfile-maven-version>1.4.13</dockerfile-maven-version>
@@ -191,6 +191,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
             <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>

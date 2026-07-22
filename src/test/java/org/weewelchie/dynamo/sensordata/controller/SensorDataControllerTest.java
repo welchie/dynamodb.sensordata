@@ -72,7 +72,7 @@ public class SensorDataControllerTest {
                                                             "&date=" + DATE  + String.format("%02d", i) +
                                                             "&tempC=" + TEMP_C +
                                                             "&tempF=" + TEMP_F,
-                    HttpMethod.GET,
+                    HttpMethod.POST,
                     new HttpEntity<>(null,authzHeaders),
                     String.class
             );
@@ -206,7 +206,7 @@ public class SensorDataControllerTest {
                         "&date=" + testDate +
                         "&tempC=" + tempC +
                         "&tempF=" + tempF ,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 new HttpEntity<>(null, authzHeaders),
                 String.class
         );
@@ -226,7 +226,7 @@ public class SensorDataControllerTest {
                         "&date=" + " " +
                         "&tempC=" + TEMP_C +
                         "&tempF=" + TEMP_F ,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 new HttpEntity<>(null, authzHeaders),
                 String.class
         );

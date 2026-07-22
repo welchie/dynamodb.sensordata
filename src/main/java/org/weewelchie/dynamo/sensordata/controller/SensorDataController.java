@@ -243,7 +243,7 @@ public class SensorDataController {
         }
     }
 
-    @GetMapping(value = "/create")
+    @PostMapping(value = "/create")
     public ResponseEntity<Object> create(@RequestParam(value = "id") String sensorId,
                          @RequestParam(value = "name") String name,
                          @RequestParam(value = "date") String date,

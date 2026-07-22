@@ -24,31 +24,54 @@ public class DynamoDBConfig {
 
     @Bean
     public AmazonDynamoDB amazonDynamoDB() {
-        if (!awsProperties.getEndPointURL().isEmpty() || !awsProperties.getEndPointURL().equals(""))
-        {
-            AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(awsProperties.getEndPointURL() ,awsProperties.getRegion()) ;
+        com.amazonaws.auth.AWSCredentialsProvider credentialsProvider;
+        String accessKey = awsProperties.getAccessKey();
+        String secretKey = awsProperties.getSecretKey();
+
+        if (accessKey != null && !accessKey.trim().isEmpty() &&
+            secretKey != null && !secretKey.trim().isEmpty()) {
+            credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
+        } else {
+            // Fallback: If local endpoint is used, use dummy credentials for DynamoDB local.
+            // Otherwise, use DefaultAWSCredentialsProviderChain for production IAM roles.
+            if (awsProperties.getEndPointURL() != null && !awsProperties.getEndPointURL().trim().isEmpty()) {
+                credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummyAccessKey", "dummySecretKey"));
+            } else {
+                credentialsProvider = new com.amazonaws.auth.DefaultAWSCredentialsProviderChain();
+            }
+        }
+
+        String region = awsProperties.getRegion();
+        if (region == null || region.trim().isEmpty()) {
+            region = "us-east-1"; // Fallback region
+        }
+
+        if (awsProperties.getEndPointURL() != null && !awsProperties.getEndPointURL().trim().isEmpty()) {
+            AwsClientBuilder.EndpointConfiguration endpointConfiguration =
+                    new AwsClientBuilder.EndpointConfiguration(awsProperties.getEndPointURL(), region);
             return AmazonDynamoDBClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider
-                            (new BasicAWSCredentials(awsProperties.getAccessKey(),awsProperties.getSecretKey())))
+                    .withCredentials(credentialsProvider)
                     .withEndpointConfiguration(endpointConfiguration)
                     .build();
-        }
-        else
-        {
+        } else {
             return AmazonDynamoDBClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider
-                            (new BasicAWSCredentials(awsProperties.getAccessKey(),awsProperties.getSecretKey())))
-                    .withRegion(awsProperties.getRegion())
+                    .withCredentials(credentialsProvider)
+                    .withRegion(region)
                     .build();
         }
-
-
     }
 
     @Bean
     public AWSCredentials amazonAWSCredentials() {
-        return new BasicAWSCredentials(
-                awsProperties.getAccessKey(), awsProperties.getSecretKey());
+        String accessKey = awsProperties.getAccessKey();
+        String secretKey = awsProperties.getSecretKey();
+        if (accessKey == null || accessKey.trim().isEmpty()) {
+            accessKey = "dummyAccessKey";
+        }
+        if (secretKey == null || secretKey.trim().isEmpty()) {
+            secretKey = "dummySecretKey";
+        }
+        return new BasicAWSCredentials(accessKey, secretKey);
     }
 
 }
