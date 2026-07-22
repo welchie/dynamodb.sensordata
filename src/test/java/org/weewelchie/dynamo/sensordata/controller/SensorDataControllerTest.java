@@ -263,4 +263,56 @@ public class SensorDataControllerTest {
         );
         //assertThat(response.getStatusCode(),is(HttpStatus.INTERNAL_SERVER_ERROR));
     }
+
+    @Test
+    public void deleteRecordUnauthenticated()
+    {
+        String date = DATE + "01";
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/delete/"+ ID + "/" + date ,
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                String.class
+        );
+        assertThat(response.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+    }
+
+    @Test
+    public void createRecordGetMethodNotAllowed()
+    {
+        String testDate = "2020-12-31 23:59:59";
+        String testID = "TEST-ID-GET";
+        String tempC = "27.4";
+        String tempF = "70.12";
+
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+testID+
+                        "&name=" + NAME +
+                        "&date=" + testDate +
+                        "&tempC=" + tempC +
+                        "&tempF=" + tempF ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
+        assertThat(response.getStatusCode(), is(HttpStatus.METHOD_NOT_ALLOWED));
+    }
+
+    @Test
+    public void createRecordUnauthenticated()
+    {
+        String testDate = "2020-12-31 23:59:59";
+        String testID = "TEST-ID-UNAUTH";
+        String tempC = "27.4";
+        String tempF = "70.12";
+
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+testID+
+                        "&name=" + NAME +
+                        "&date=" + testDate +
+                        "&tempC=" + tempC +
+                        "&tempF=" + tempF ,
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String.class
+        );
+        assertThat(response.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+    }
 }
