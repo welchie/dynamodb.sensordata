@@ -37,3 +37,34 @@ Spring Boot application
 - JWT Tokens for Security
 - Swagger Open API Document methods
 - React App for Chart of data.
+
+## Configuration & Running
+
+The application externalizes credentials (API basic auth, Docker Hub registry, and AWS connection details) via environment variables.
+
+### Local Development Setup
+
+1. **Copy the environment template**:
+   ```bash
+   cp .env.example .env
+   ```
+2. **Configure your variables**:
+   Open the `.env` file and populate it with your local development credentials.
+
+3. **Export environment variables and run**:
+   * **On macOS/Linux**:
+     ```bash
+     export $(cat .env | grep -v '#' | xargs)
+     ./mvnw spring-boot:run
+     ```
+   * **On Windows (PowerShell)**:
+     ```powershell
+     Get-Content .env | ForEach-Object {
+         if ($_ -and -not $_.StartsWith("#")) {
+             $name, $value = $_ -split '=', 2
+             [Environment]::SetEnvironmentVariable($name, $value, "Process")
+         }
+     }
+     ./mvnw.cmd spring-boot:run
+     ```
+
