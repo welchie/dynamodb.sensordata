@@ -11,6 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.regions.Region;
+import java.net.URI;
 
 @Configuration
 @EnableDynamoDBRepositories (basePackages = "org.weewelchie.dynamo.sensordata.repositories")
@@ -72,6 +78,47 @@ public class DynamoDBConfig {
             secretKey = "dummySecretKey";
         }
         return new BasicAWSCredentials(accessKey, secretKey);
+    }
+
+    @Bean
+    public DynamoDbClient dynamoDbClient() {
+        AwsCredentialsProvider credentialsProvider;
+        String accessKey = awsProperties.getAccessKey();
+        String secretKey = awsProperties.getSecretKey();
+
+        if (accessKey != null && !accessKey.trim().isEmpty() &&
+            secretKey != null && !secretKey.trim().isEmpty()) {
+            credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
+        } else {
+            if (awsProperties.getEndPointURL() != null && !awsProperties.getEndPointURL().trim().isEmpty()) {
+                credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create("dummyAccessKey", "dummySecretKey"));
+            } else {
+                credentialsProvider = software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider.create();
+            }
+        }
+
+        String regionStr = awsProperties.getRegion();
+        if (regionStr == null || regionStr.trim().isEmpty()) {
+            regionStr = "us-east-1";
+        }
+        Region region = Region.of(regionStr);
+
+        if (awsProperties.getEndPointURL() != null && !awsProperties.getEndPointURL().trim().isEmpty()) {
+            try {
+                return DynamoDbClient.builder()
+                        .credentialsProvider(credentialsProvider)
+                        .endpointOverride(new URI(awsProperties.getEndPointURL()))
+                        .region(region)
+                        .build();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to construct DynamoDbClient with local endpoint override", e);
+            }
+        } else {
+            return DynamoDbClient.builder()
+                    .credentialsProvider(credentialsProvider)
+                    .region(region)
+                    .build();
+        }
     }
 
 }
