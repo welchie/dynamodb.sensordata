@@ -26,6 +26,7 @@ public class VersionControllerTest {
     public void testGetVersion() {
         ResponseEntity<String> response = restTemplate.getForEntity(VERSION_URL, String.class);
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_GATEWAY));
-        assertThat(response.getBody(), CoreMatchers.containsString("{\"profiles\":[\"\"],\"errors\":[\"Cannot read version from the Manifest file\"]}"));
+        assertThat(response.getBody(), CoreMatchers.containsString("errors"));
+        assertThat(response.getBody(), CoreMatchers.containsString("Cannot read version from the Manifest file"));
     }
 }

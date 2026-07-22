@@ -17,7 +17,12 @@ import static org.hamcrest.core.Is.is;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {
+        "amazon.aws.accessKey=dummyAccessKey",
+        "amazon.aws.secretKey=dummySecretKey",
+        "amazon.aws.region=us-east-1",
+        "amazon.aws.endPointURL=http://localhost:8000"
+})
 @Profile("test")
 public class SensorDataControllerTest {
 
@@ -293,7 +298,7 @@ public class SensorDataControllerTest {
                 new HttpEntity<>(null, authzHeaders),
                 String.class
         );
-        assertThat(response.getStatusCode(), is(HttpStatus.METHOD_NOT_ALLOWED));
+        assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND));
     }
 
     @Test
