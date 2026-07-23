@@ -27,7 +27,9 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers(new AntPathRequestMatcher("/sensordata/**"))
+                )
                 .authorizeHttpRequests((authz) -> authz
                         .anyRequest().authenticated()
                 )
