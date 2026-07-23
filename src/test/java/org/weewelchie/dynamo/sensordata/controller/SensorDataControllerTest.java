@@ -21,7 +21,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
         "amazon.aws.accessKey=dummyAccessKey",
         "amazon.aws.secretKey=dummySecretKey",
         "amazon.aws.region=us-east-1",
-        "amazon.aws.endPointURL=http://localhost:8000"
+        "amazon.aws.endpointUrl=http://localhost:8000"
 })
 @Profile("test")
 public class SensorDataControllerTest {

@@ -12,8 +12,7 @@ public class AwsProperties {
     private String accessKey;
     private String secretKey;
     private String region;
-
-    private String endPointURL= "";
+    private String endpointUrl = "";
 
     public String getAccessKey() {
         return accessKey;
@@ -39,11 +38,11 @@ public class AwsProperties {
         this.region = region;
     }
 
-    public String getEndPointURL() {
-        return endPointURL;
+    public String getEndpointUrl() {
+        return endpointUrl;
     }
 
-    public void setEndPointURL(String endPointURL) {
-        this.endPointURL = endPointURL;
+    public void setEndpointUrl(String endpointUrl) {
+        this.endpointUrl = endpointUrl;
     }
 }

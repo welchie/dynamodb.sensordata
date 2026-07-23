@@ -77,7 +77,7 @@ public class SensorDataRepositoryIntegrationTest {
         String amazonAWSAccessKey = awsProperties.getAccessKey();
 
         String amazonAWSSecretKey = awsProperties.getSecretKey();
-        String amazonDynamoDBEndpoint = awsProperties.getEndPointURL();
+        String amazonDynamoDBEndpoint = awsProperties.getEndpointUrl();
         String amazonAWSRegion = awsProperties.getRegion();
 
         AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(amazonDynamoDBEndpoint ,amazonAWSRegion) ;

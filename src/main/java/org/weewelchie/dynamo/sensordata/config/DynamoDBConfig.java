@@ -40,7 +40,7 @@ public class DynamoDBConfig {
         } else {
             // Fallback: If local endpoint is used, use dummy credentials for DynamoDB local.
             // Otherwise, use DefaultAWSCredentialsProviderChain for production IAM roles.
-            if (awsProperties.getEndPointURL() != null && !awsProperties.getEndPointURL().trim().isEmpty()) {
+            if (awsProperties.getEndpointUrl() != null && !awsProperties.getEndpointUrl().trim().isEmpty()) {
                 credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummyAccessKey", "dummySecretKey"));
             } else {
                 credentialsProvider = new com.amazonaws.auth.DefaultAWSCredentialsProviderChain();
@@ -52,9 +52,9 @@ public class DynamoDBConfig {
             region = "us-east-1"; // Fallback region
         }
 
-        if (awsProperties.getEndPointURL() != null && !awsProperties.getEndPointURL().trim().isEmpty()) {
+        if (awsProperties.getEndpointUrl() != null && !awsProperties.getEndpointUrl().trim().isEmpty()) {
             AwsClientBuilder.EndpointConfiguration endpointConfiguration =
-                    new AwsClientBuilder.EndpointConfiguration(awsProperties.getEndPointURL(), region);
+                    new AwsClientBuilder.EndpointConfiguration(awsProperties.getEndpointUrl(), region);
             return AmazonDynamoDBClientBuilder.standard()
                     .withCredentials(credentialsProvider)
                     .withEndpointConfiguration(endpointConfiguration)
@@ -90,7 +90,7 @@ public class DynamoDBConfig {
             secretKey != null && !secretKey.trim().isEmpty()) {
             credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
         } else {
-            if (awsProperties.getEndPointURL() != null && !awsProperties.getEndPointURL().trim().isEmpty()) {
+            if (awsProperties.getEndpointUrl() != null && !awsProperties.getEndpointUrl().trim().isEmpty()) {
                 credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create("dummyAccessKey", "dummySecretKey"));
             } else {
                 credentialsProvider = software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider.create();
@@ -103,11 +103,11 @@ public class DynamoDBConfig {
         }
         Region region = Region.of(regionStr);
 
-        if (awsProperties.getEndPointURL() != null && !awsProperties.getEndPointURL().trim().isEmpty()) {
+        if (awsProperties.getEndpointUrl() != null && !awsProperties.getEndpointUrl().trim().isEmpty()) {
             try {
                 return DynamoDbClient.builder()
                         .credentialsProvider(credentialsProvider)
-                        .endpointOverride(new URI(awsProperties.getEndPointURL()))
+                        .endpointOverride(new URI(awsProperties.getEndpointUrl()))
                         .region(region)
                         .build();
             } catch (Exception e) {
