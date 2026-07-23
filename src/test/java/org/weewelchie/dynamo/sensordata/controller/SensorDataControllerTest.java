@@ -17,7 +17,12 @@ import static org.hamcrest.core.Is.is;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {
+        "amazon.aws.accessKey=dummyAccessKey",
+        "amazon.aws.secretKey=dummySecretKey",
+        "amazon.aws.region=us-east-1",
+        "amazon.aws.endPointURL=http://localhost:8000"
+})
 @Profile("test")
 public class SensorDataControllerTest {
 
@@ -72,7 +77,7 @@ public class SensorDataControllerTest {
                                                             "&date=" + DATE  + String.format("%02d", i) +
                                                             "&tempC=" + TEMP_C +
                                                             "&tempF=" + TEMP_F,
-                    HttpMethod.GET,
+                    HttpMethod.POST,
                     new HttpEntity<>(null,authzHeaders),
                     String.class
             );
@@ -206,7 +211,7 @@ public class SensorDataControllerTest {
                         "&date=" + testDate +
                         "&tempC=" + tempC +
                         "&tempF=" + tempF ,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 new HttpEntity<>(null, authzHeaders),
                 String.class
         );
@@ -226,7 +231,7 @@ public class SensorDataControllerTest {
                         "&date=" + " " +
                         "&tempC=" + TEMP_C +
                         "&tempF=" + TEMP_F ,
-                HttpMethod.GET,
+                HttpMethod.POST,
                 new HttpEntity<>(null, authzHeaders),
                 String.class
         );
@@ -262,5 +267,57 @@ public class SensorDataControllerTest {
                 String.class
         );
         //assertThat(response.getStatusCode(),is(HttpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    @Test
+    public void deleteRecordUnauthenticated()
+    {
+        String date = DATE + "01";
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/delete/"+ ID + "/" + date ,
+                HttpMethod.DELETE,
+                HttpEntity.EMPTY,
+                String.class
+        );
+        assertThat(response.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
+    }
+
+    @Test
+    public void createRecordGetMethodNotAllowed()
+    {
+        String testDate = "2020-12-31 23:59:59";
+        String testID = "TEST-ID-GET";
+        String tempC = "27.4";
+        String tempF = "70.12";
+
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+testID+
+                        "&name=" + NAME +
+                        "&date=" + testDate +
+                        "&tempC=" + tempC +
+                        "&tempF=" + tempF ,
+                HttpMethod.GET,
+                new HttpEntity<>(null, authzHeaders),
+                String.class
+        );
+        assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND));
+    }
+
+    @Test
+    public void createRecordUnauthenticated()
+    {
+        String testDate = "2020-12-31 23:59:59";
+        String testID = "TEST-ID-UNAUTH";
+        String tempC = "27.4";
+        String tempF = "70.12";
+
+        ResponseEntity<String> response = restTemplate.exchange(SENSORDATA_URL + "/create?id="+testID+
+                        "&name=" + NAME +
+                        "&date=" + testDate +
+                        "&tempC=" + tempC +
+                        "&tempF=" + tempF ,
+                HttpMethod.POST,
+                HttpEntity.EMPTY,
+                String.class
+        );
+        assertThat(response.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
     }
 }

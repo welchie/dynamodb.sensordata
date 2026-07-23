@@ -50,6 +50,9 @@ public class SensorDataController {
     @Autowired
     DynamoDBConfig dynamoDBConfig;
 
+    @Autowired
+    DynamoDbClient dynamoDbClient;
+
     private static final String TABLE_NAME = "SensorData";
     private static final String ERROR_TITLE = "errors";
 
@@ -243,7 +246,7 @@ public class SensorDataController {
         }
     }
 
-    @GetMapping(value = "/create")
+    @PostMapping(value = "/create")
     public ResponseEntity<Object> create(@RequestParam(value = "id") String sensorId,
                          @RequestParam(value = "name") String name,
                          @RequestParam(value = "date") String date,
@@ -311,36 +314,12 @@ public class SensorDataController {
     }
 
     @GetMapping(value="/admin/create")
-    public ResponseEntity<Object> createSensorDataTable() throws URISyntaxException, AwsPropertiesException {
-        if (    isEmpty(awsProperties.getRegion()) ||
-                isEmpty(awsProperties.getAccessKey()) ||
-                isEmpty(awsProperties.getSecretKey()))
-        {
-            throw new AwsPropertiesException("Unable to get AWS Properties");
-        }
+    public ResponseEntity<Object> createSensorDataTable() {
         logger.info("Creating SensorData table in DynamoDB...");
-        AwsCredentialsProvider creds = StaticCredentialsProvider.create(AwsBasicCredentials.create(awsProperties.getAccessKey(), awsProperties.getSecretKey()));
-
-        DynamoDbClient dbClient;
-        if (!awsProperties.getEndPointURL().equals(""))
-        {
-            dbClient = DynamoDbClient.builder()
-                    .region(Region.of(awsProperties.getRegion()))
-                    .endpointOverride(new URI(awsProperties.getEndPointURL()) )
-                    .credentialsProvider(creds)
-                    .build();
-        }
-        else
-        {
-            dbClient = DynamoDbClient.builder()
-                    .region(Region.of(awsProperties.getRegion()))
-                    .credentialsProvider(creds)
-                    .build();
-        }
 
         DynamoDbEnhancedClient enhancedClient =
                 DynamoDbEnhancedClient.builder()
-                        .dynamoDbClient(dbClient)
+                        .dynamoDbClient(dynamoDbClient)
                         .build();
 
         DynamoDbTable<SensorData> sensorDataTable =
@@ -349,7 +328,7 @@ public class SensorDataController {
 
         try
         {
-            String responseText =createSensorDataTable(sensorDataTable,dbClient);
+            String responseText =createSensorDataTable(sensorDataTable,dynamoDbClient);
             Map<String, List<String>> response = new HashMap<>(1);
             List<String> result = new ArrayList<>();
             result.add(responseText);

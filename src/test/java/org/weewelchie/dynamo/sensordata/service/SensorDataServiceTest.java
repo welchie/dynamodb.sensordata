@@ -33,11 +33,8 @@ public class SensorDataServiceTest {
     @InjectMocks
     private SensorDataService service;
 
-    @Mock
-    private SensorData sensorDataMock;
-
-    @Mock
-    private SensorDataId sensorDataIdMock;
+    private SensorData sensorData;
+    private SensorDataId sensorDataId;
 
     private static final String ID = "TEMP-1234567890";
 
@@ -48,18 +45,19 @@ public class SensorDataServiceTest {
 
     @Before
     public void setupReturnValuesOfMockMethods() {
-        when(sensorDataRepositoryMock.findById(ID)).thenReturn(List.of(sensorDataMock));
-        when(sensorDataRepositoryMock.findAll()).thenReturn(List.of(sensorDataMock));
-        when(sensorDataRepositoryMock.findByDate(START_DATE)).thenReturn(List.of(sensorDataMock));
-        when(sensorDataRepositoryMock.findByDateBetween(START_DATE,END_DATE)).thenReturn(List.of(sensorDataMock));
-        when(sensorDataRepositoryMock.findById(sensorDataIdMock)).thenReturn(Optional.of(sensorDataMock));
-        when(sensorDataIdMock.getId()).thenReturn(ID);
-        when(sensorDataIdMock.getDate()).thenReturn(START_DATE);
+        sensorData = new SensorData(ID, NAME, START_DATE, "12.25", "68.13");
+        sensorDataId = new SensorDataId(ID, START_DATE);
+
+        when(sensorDataRepositoryMock.findById(ID)).thenReturn(List.of(sensorData));
+        when(sensorDataRepositoryMock.findAll()).thenReturn(List.of(sensorData));
+        when(sensorDataRepositoryMock.findByDate(START_DATE)).thenReturn(List.of(sensorData));
+        when(sensorDataRepositoryMock.findByDateBetween(START_DATE,END_DATE)).thenReturn(List.of(sensorData));
+        when(sensorDataRepositoryMock.findById(sensorDataId)).thenReturn(Optional.of(sensorData));
     }
     @Test
     public void findById() throws SensorDataException {
         //invoke and verify lookupRatingById
-        assertThat(service.findById(ID), is(List.of(sensorDataMock)));
+        assertThat(service.findById(ID), is(List.of(sensorData)));
     }
 
     @Test
@@ -79,7 +77,7 @@ public class SensorDataServiceTest {
     @Test
     public void findBySensorDataId() throws SensorDataException {
 
-        assertThat(service.findBySensorDataID(sensorDataIdMock), is(Optional.of(sensorDataMock)));
+        assertThat(service.findBySensorDataID(sensorDataId), is(Optional.of(sensorData)));
     }
 
     @Test
@@ -112,11 +110,11 @@ public class SensorDataServiceTest {
     @Test
     public void findAll() {
         //invoke and verify findAll
-        assertThat(service.findAll().get(0), is(sensorDataMock));
+        assertThat(service.findAll().get(0), is(sensorData));
     }
     @Test
     public void findByDate() throws SensorDataException {
-        assertThat(service.findByDate(START_DATE).get(0),is(sensorDataMock));
+        assertThat(service.findByDate(START_DATE).get(0),is(sensorData));
     }
 
     @Test
@@ -134,7 +132,7 @@ public class SensorDataServiceTest {
     }
     @Test
     public void findBetweenDates() throws SensorDataException {
-        assertThat(service.findBetweenDates(START_DATE,END_DATE).get(0),is(sensorDataMock));
+        assertThat(service.findBetweenDates(START_DATE,END_DATE).get(0),is(sensorData));
     }
 
     @Test
@@ -185,10 +183,10 @@ public class SensorDataServiceTest {
         ArgumentCaptor<SensorData> sensorDataCaptor = ArgumentCaptor.forClass(SensorData.class);
 
         //invoke createNew
-        SensorData sensorData = new SensorData(ID,NAME,START_DATE,"12.25","68.13");
+        SensorData sensorDataVal = new SensorData(ID,NAME,START_DATE,"12.25","68.13");
         //assertThat(service.createRecord(sensorData),is(sensorDataTest));
 
-        service.createRecord(sensorData);
+        service.createRecord(sensorDataVal);
         //verify tourRatingRepository.save invoked once and capture the TourRating Object
         verify(sensorDataRepositoryMock).save(sensorDataCaptor.capture());
 
@@ -215,7 +213,7 @@ public class SensorDataServiceTest {
     @Test
     public void delete() {
         //invoke delete
-        service.deleteRecord(sensorDataMock);
+        service.deleteRecord(sensorData);
 
         //verify tourRatingRepository.delete invoked
         verify(sensorDataRepositoryMock).delete(any(SensorData.class));
