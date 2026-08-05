@@ -43,7 +43,7 @@
         <org.springframework.spring.version>5.3.29</org.springframework.spring.version>
         <org.springframework.version>6.0.11</org.springframework.version>
         <org.h2.version>2.2.220</org.h2.version>
-        <jackson.core.version>2.15.2</jackson.core.version>
+        <jackson.core.version>2.18.8</jackson.core.version>
         <jackson.databind.version>2.10.5.1.LIFERAY-PATCHED-1</jackson.databind.version>
         <io.netty.version>4.1.136.Final</io.netty.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
