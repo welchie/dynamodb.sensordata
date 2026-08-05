@@ -45,7 +45,7 @@
         <org.h2.version>2.2.220</org.h2.version>
         <jackson.core.version>2.15.2</jackson.core.version>
         <jackson.databind.version>2.10.5.1.LIFERAY-PATCHED-1</jackson.databind.version>
-        <io.netty.version>4.1.96.Final</io.netty.version>
+        <io.netty.version>4.1.136.Final</io.netty.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <snakeyaml.version>2.1</snakeyaml.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
